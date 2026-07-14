@@ -26,8 +26,13 @@
   var currentId = "";
   var saveTimer = 0;
   var statusTimer = 0;
+  let roastChartCanvas = null;
+  let roastChartContext = null;
+  let chartResizeObserver = null;
+  let chartUpdateTimer = 0;
 
   initTables();
+  initializeRoastChart();
   applyInputHints();
   bindEvents();
   loadInitialData();
@@ -227,6 +232,7 @@
     updateWeightLoss();
     updateRor();
     renderPhases();
+    updateRoastChart();
   }
 
   function updateWeightLoss() {
@@ -262,6 +268,8 @@
       }
       if (currentTemp !== null && Number.isFinite(currentTemp)) {
         previousTemp = currentTemp;
+      } else {
+        previousTemp = null;
       }
     }
   }
@@ -407,6 +415,7 @@
     document.getElementById("roastDate").value = todayString();
     localStorage.removeItem(DRAFT_KEY);
     updateComputedFields();
+    clearRoastChart(true);
     setStatus("編集中");
   }
 
@@ -428,6 +437,7 @@
     document.getElementById("roastDate").value = todayString();
     localStorage.removeItem(DRAFT_KEY);
     updateComputedFields();
+    clearRoastChart(true);
     setStatus("編集中");
     renderHistory();
   }
@@ -632,6 +642,342 @@
       .filter(function (input) {
         return !input.matches("[type=\"button\"], [type=\"submit\"], [type=\"reset\"], [type=\"radio\"], [readonly], [disabled], [tabindex=\"-1\"]");
       });
+  }
+
+  function initializeRoastChart() {
+    roastChartCanvas = document.getElementById("roastChart");
+    if (!roastChartCanvas) {
+      return;
+    }
+
+    roastChartContext = roastChartCanvas.getContext("2d");
+    if (window.ResizeObserver) {
+      chartResizeObserver = new ResizeObserver(resizeRoastChart);
+      chartResizeObserver.observe(roastChartCanvas.parentElement);
+    } else {
+      window.addEventListener("resize", resizeRoastChart);
+    }
+  }
+
+  function collectChartData() {
+    const temperatures = [];
+    const rors = [];
+    const events = [
+      { key: "bottom", label: "BOTTOM" },
+      { key: "dryEnd", label: "DRY END" },
+      { key: "firstCrack", label: "FC" },
+      { key: "endTemp", label: "END" }
+    ];
+
+    for (let minute = 0; minute <= 15; minute += 1) {
+      const temp = parseChartNumber(getLogInput(minute, "temp").value);
+      const ror = parseChartNumber(getLogInput(minute, "ror").value);
+      temperatures.push({ minute: minute, value: temp });
+      rors.push({ minute: minute, value: ror });
+    }
+
+    return {
+      temperatures: temperatures,
+      rors: rors,
+      events: events.map(function (eventItem) {
+        const seconds = parseTimeToSeconds(getEventTimeInput(eventItem.key).value);
+        return {
+          key: eventItem.key,
+          label: eventItem.label,
+          minute: seconds === null ? null : seconds / 60
+        };
+      }).filter(function (eventItem) {
+        return eventItem.minute !== null && eventItem.minute >= 0 && eventItem.minute <= 15;
+      })
+    };
+  }
+
+  function drawRoastChart() {
+    if (!roastChartCanvas || !roastChartContext) {
+      return;
+    }
+
+    const data = collectChartData();
+    const hasTemperature = data.temperatures.some(function (point) {
+      return point.value !== null;
+    });
+    const hasRor = data.rors.some(function (point) {
+      return point.value !== null;
+    });
+    const wrapper = roastChartCanvas.parentElement;
+
+    if (!hasTemperature && !hasRor) {
+      wrapper.classList.remove("has-data");
+      clearRoastChart(true);
+      return;
+    }
+
+    wrapper.classList.add("has-data");
+    const size = resizeRoastChart(false);
+    const ctx = roastChartContext;
+    const plot = {
+      left: size.width < 560 ? 38 : 52,
+      right: size.width < 560 ? 38 : 50,
+      top: 18,
+      bottom: size.width < 560 ? 32 : 40
+    };
+    plot.width = size.width - plot.left - plot.right;
+    plot.height = size.height - plot.top - plot.bottom;
+
+    const scales = buildChartScales(data, plot);
+    clearRoastChart(false);
+    drawAxes(ctx, plot, scales, size);
+    drawEventMarkers(ctx, plot, scales, data.events);
+    drawTemperatureLine(ctx, plot, scales, data.temperatures);
+    drawRorLine(ctx, plot, scales, data.rors);
+  }
+
+  function drawAxes(ctx, plot, scales, size) {
+    const isNarrow = size.width < 560;
+    const xLabelStep = isNarrow ? 2 : 1;
+
+    ctx.save();
+    ctx.lineWidth = 1;
+    ctx.strokeStyle = "#e8eee9";
+    ctx.fillStyle = "#68746d";
+    ctx.font = (isNarrow ? "10px" : "12px") + " -apple-system, BlinkMacSystemFont, sans-serif";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "top";
+
+    for (let minute = 0; minute <= 15; minute += 1) {
+      const x = scales.x(minute);
+      ctx.beginPath();
+      ctx.moveTo(x, plot.top);
+      ctx.lineTo(x, plot.top + plot.height);
+      ctx.stroke();
+      if (minute % xLabelStep === 0) {
+        ctx.fillText(String(minute), x, plot.top + plot.height + 8);
+      }
+    }
+
+    ctx.textAlign = "right";
+    ctx.textBaseline = "middle";
+    scales.tempTicks.forEach(function (tick) {
+      const y = scales.tempY(tick);
+      ctx.beginPath();
+      ctx.moveTo(plot.left, y);
+      ctx.lineTo(plot.left + plot.width, y);
+      ctx.stroke();
+      ctx.fillText(formatAxisNumber(tick), plot.left - 7, y);
+    });
+
+    ctx.textAlign = "left";
+    scales.rorTicks.forEach(function (tick) {
+      ctx.fillText(formatAxisNumber(tick), plot.left + plot.width + 7, scales.rorY(tick));
+    });
+
+    ctx.strokeStyle = "#cfd8d2";
+    ctx.beginPath();
+    ctx.moveTo(plot.left, plot.top);
+    ctx.lineTo(plot.left, plot.top + plot.height);
+    ctx.lineTo(plot.left + plot.width, plot.top + plot.height);
+    ctx.lineTo(plot.left + plot.width, plot.top);
+    ctx.stroke();
+
+    ctx.fillStyle = "#17201b";
+    ctx.textAlign = "left";
+    ctx.textBaseline = "top";
+    ctx.fillText("温度 ℃", plot.left, 0);
+    ctx.textAlign = "right";
+    ctx.fillText("ROR", plot.left + plot.width, 0);
+    ctx.restore();
+  }
+
+  function drawTemperatureLine(ctx, plot, scales, points) {
+    drawSegmentedLine(ctx, points, scales.x, scales.tempY, {
+      color: "#234b36",
+      width: 2.6,
+      dash: []
+    });
+  }
+
+  function drawRorLine(ctx, plot, scales, points) {
+    drawSegmentedLine(ctx, points, scales.x, scales.rorY, {
+      color: "#7b6a56",
+      width: 2.2,
+      dash: [7, 5]
+    });
+  }
+
+  function drawEventMarkers(ctx, plot, scales, events) {
+    const labelRows = {};
+
+    ctx.save();
+    ctx.strokeStyle = "rgba(35, 75, 54, 0.48)";
+    ctx.fillStyle = "#234b36";
+    ctx.lineWidth = 1;
+    ctx.font = "10px -apple-system, BlinkMacSystemFont, sans-serif";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "top";
+    ctx.setLineDash([3, 4]);
+
+    events.forEach(function (eventItem) {
+      const x = scales.x(eventItem.minute);
+      const slot = Math.round(x / 34);
+      labelRows[slot] = (labelRows[slot] || 0) + 1;
+      const labelY = plot.top + 4 + ((labelRows[slot] - 1) % 3) * 13;
+
+      ctx.beginPath();
+      ctx.moveTo(x, plot.top);
+      ctx.lineTo(x, plot.top + plot.height);
+      ctx.stroke();
+      ctx.fillText(eventItem.label, x, labelY);
+    });
+    ctx.restore();
+  }
+
+  function resizeRoastChart(redraw) {
+    if (!roastChartCanvas || !roastChartContext) {
+      return { width: 0, height: 0 };
+    }
+
+    const rect = roastChartCanvas.getBoundingClientRect();
+    const width = Math.max(320, Math.round(rect.width));
+    const height = Math.max(180, Math.round(rect.height));
+    const ratio = window.devicePixelRatio || 1;
+    const pixelWidth = Math.round(width * ratio);
+    const pixelHeight = Math.round(height * ratio);
+
+    if (roastChartCanvas.width !== pixelWidth || roastChartCanvas.height !== pixelHeight) {
+      roastChartCanvas.width = pixelWidth;
+      roastChartCanvas.height = pixelHeight;
+    }
+    roastChartContext.setTransform(ratio, 0, 0, ratio, 0, 0);
+
+    if (redraw !== false) {
+      updateRoastChart();
+    }
+    return { width: width, height: height };
+  }
+
+  function clearRoastChart(resetState) {
+    if (!roastChartCanvas || !roastChartContext) {
+      return;
+    }
+    if (resetState) {
+      window.clearTimeout(chartUpdateTimer);
+      roastChartCanvas.parentElement.classList.remove("has-data");
+    }
+    const ratio = window.devicePixelRatio || 1;
+    roastChartContext.clearRect(0, 0, roastChartCanvas.width / ratio, roastChartCanvas.height / ratio);
+  }
+
+  function updateRoastChart() {
+    if (!roastChartCanvas) {
+      return;
+    }
+    window.clearTimeout(chartUpdateTimer);
+    chartUpdateTimer = window.setTimeout(drawRoastChart, 80);
+  }
+
+  function drawSegmentedLine(ctx, points, xScale, yScale, options) {
+    let drawing = false;
+
+    ctx.save();
+    ctx.strokeStyle = options.color;
+    ctx.lineWidth = options.width;
+    ctx.lineJoin = "round";
+    ctx.lineCap = "round";
+    ctx.setLineDash(options.dash);
+    ctx.beginPath();
+
+    points.forEach(function (point) {
+      if (point.value === null) {
+        drawing = false;
+        return;
+      }
+
+      const x = xScale(point.minute);
+      const y = yScale(point.value);
+      if (!drawing) {
+        ctx.moveTo(x, y);
+        drawing = true;
+      } else {
+        ctx.lineTo(x, y);
+      }
+    });
+
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  function buildChartScales(data, plot) {
+    const tempValues = data.temperatures
+      .map(function (point) { return point.value; })
+      .filter(function (value) { return value !== null; });
+    const rorValues = data.rors
+      .map(function (point) { return point.value; })
+      .filter(function (value) { return value !== null; });
+    const tempRange = paddedRange(tempValues, 20, 220, 0.08);
+    const rorRange = paddedRange(rorValues, -5, 20, 0.16);
+
+    return {
+      x: function (minute) {
+        return plot.left + (minute / 15) * plot.width;
+      },
+      tempY: function (value) {
+        return plot.top + ((tempRange.max - value) / (tempRange.max - tempRange.min)) * plot.height;
+      },
+      rorY: function (value) {
+        return plot.top + ((rorRange.max - value) / (rorRange.max - rorRange.min)) * plot.height;
+      },
+      tempTicks: makeTicks(tempRange.min, tempRange.max, 5),
+      rorTicks: makeTicks(rorRange.min, rorRange.max, 5)
+    };
+  }
+
+  function parseChartNumber(value) {
+    const trimmed = String(value || "").trim();
+    if (!trimmed) {
+      return null;
+    }
+    const number = Number(trimmed);
+    return Number.isFinite(number) ? number : null;
+  }
+
+  function paddedRange(values, fallbackMin, fallbackMax, paddingRatio) {
+    if (!values.length) {
+      return { min: fallbackMin, max: fallbackMax };
+    }
+
+    let min = Math.min.apply(null, values);
+    let max = Math.max.apply(null, values);
+    if (min === max) {
+      min -= 5;
+      max += 5;
+    }
+
+    const padding = Math.max((max - min) * paddingRatio, 1);
+    return {
+      min: niceFloor(min - padding),
+      max: niceCeil(max + padding)
+    };
+  }
+
+  function niceFloor(value) {
+    return Math.floor(value / 5) * 5;
+  }
+
+  function niceCeil(value) {
+    return Math.ceil(value / 5) * 5;
+  }
+
+  function makeTicks(min, max, count) {
+    const ticks = [];
+    const step = (max - min) / (count - 1);
+    for (let index = 0; index < count; index += 1) {
+      ticks.push(min + step * index);
+    }
+    return ticks;
+  }
+
+  function formatAxisNumber(value) {
+    return Math.abs(value) >= 10 || Number.isInteger(value) ? String(Math.round(value)) : value.toFixed(1);
   }
 
   function flashStatus(text, fallback) {

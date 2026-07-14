@@ -149,9 +149,25 @@
         </div>
       </section>
 
-      <section class="record-section" aria-labelledby="log-title">
+      <section class="record-section roast-chart-section" aria-labelledby="chart-title">
         <div class="section-heading">
           <span>6</span>
+          <h2 id="chart-title">焙煎プロファイル</h2>
+        </div>
+        <div class="chart-wrapper">
+          <div class="chart-legend" aria-hidden="true">
+            <span><i class="legend-line temp-line"></i>温度</span>
+            <span><i class="legend-line ror-line"></i>ROR</span>
+          </div>
+          <canvas id="roastChart" aria-label="焙煎温度とRORの推移グラフ" aria-describedby="chartDescription" role="img"></canvas>
+          <p class="chart-empty-message" id="chartEmptyMessage">ログに温度を入力するとグラフが表示されます</p>
+          <p class="sr-only" id="chartDescription">0分から15分までの焙煎温度、ROR、ボトム、ドライエンド、FC、ENDの位置を表示します。</p>
+        </div>
+      </section>
+
+      <section class="record-section" aria-labelledby="log-title">
+        <div class="section-heading">
+          <span>7</span>
           <h2 id="log-title">1分ごとのログ</h2>
         </div>
         <div class="log-table-wrap" tabindex="0" aria-label="1分ごとのログ表">
@@ -172,7 +188,7 @@
 
       <section class="record-section" aria-labelledby="memo-title">
         <div class="section-heading">
-          <span>7</span>
+          <span>8</span>
           <h2 id="memo-title">メモ</h2>
         </div>
         <label class="field">
@@ -183,7 +199,7 @@
 
       <section class="record-section actions-section" aria-labelledby="actions-title">
         <div class="section-heading">
-          <span>8</span>
+          <span>9</span>
           <h2 id="actions-title">操作ボタン</h2>
         </div>
         <div class="action-row">
@@ -199,7 +215,7 @@
 
     <section class="record-section history-section" aria-labelledby="history-title">
       <div class="section-heading">
-        <span>9</span>
+        <span>10</span>
         <h2 id="history-title">履歴</h2>
       </div>
       <div class="history-tools">
