@@ -674,11 +674,11 @@ td input {
 @media print {
   @page {
     size: A4;
-    margin: 3mm 3mm 2.5mm;
+    margin: 8mm;
   }
 
   html {
-    font-size: 8.2px;
+    font-size: 9px;
   }
 
   body {
@@ -686,6 +686,8 @@ td input {
     background: #fff;
     line-height: 1.12;
     min-width: 0;
+    width: 194mm;
+    margin: 0 auto;
   }
 
   .site-header {
@@ -694,8 +696,9 @@ td input {
 
   .header-inner,
   .page-shell {
-    width: 100%;
+    width: 194mm;
     max-width: none;
+    margin: 0 auto;
     padding: 1px 0;
   }
 
@@ -707,8 +710,8 @@ td input {
   }
 
   .brand-logo {
-    width: 27px;
-    height: 27px;
+    width: 29px;
+    height: 29px;
   }
 
   .brand {
@@ -716,12 +719,12 @@ td input {
   }
 
   .brand h1 {
-    font-size: 1.32rem;
+    font-size: 1.38rem;
   }
 
   .brand p {
     margin-top: 0;
-    font-size: 0.78rem;
+    font-size: 0.82rem;
   }
 
   .record-section {
@@ -741,14 +744,14 @@ td input {
   }
 
   .section-heading span {
-    width: 14px;
-    height: 14px;
-    font-size: 0.72rem;
+    width: 15px;
+    height: 15px;
+    font-size: 0.76rem;
     box-shadow: none !important;
   }
 
   .section-heading h2 {
-    font-size: 0.96rem;
+    font-size: 1.02rem;
   }
 
   .form-grid,
@@ -763,18 +766,18 @@ td input {
 
   .field span,
   .radio-field legend {
-    font-size: 0.75rem;
+    font-size: 0.8rem;
   }
 
   .field input,
   .field textarea,
   .history-tools input,
   td input {
-    min-height: 12px;
-    height: 12px;
+    min-height: 13px;
+    height: 13px;
     border-radius: 2px;
     padding: 0 2px;
-    font-size: 0.74rem;
+    font-size: 0.78rem;
     box-shadow: none !important;
   }
 
@@ -785,8 +788,8 @@ td input {
   }
 
   .field textarea {
-    min-height: 22px;
-    height: 22px;
+    min-height: 24px;
+    height: 24px;
   }
 
   .with-unit {
@@ -796,7 +799,7 @@ td input {
   .with-unit em {
     min-width: 0;
     padding-bottom: 1px;
-    font-size: 0.75rem;
+    font-size: 0.8rem;
   }
 
   .radio-row {
@@ -806,10 +809,10 @@ td input {
   }
 
   .radio-row label {
-    min-height: 12px;
+    min-height: 13px;
     border-radius: 2px;
     gap: 1px;
-    font-size: 0.68rem;
+    font-size: 0.72rem;
   }
 
   .weather-icon {
@@ -834,7 +837,7 @@ td input {
     gap: 6px;
     justify-content: flex-start;
     margin-bottom: 0;
-    font-size: 0.6rem;
+    font-size: 0.64rem;
   }
 
   .legend-line {
@@ -843,7 +846,7 @@ td input {
   }
 
   #roastChart {
-    height: 150px;
+    height: 162px;
   }
 
   .chart-empty-message {
@@ -855,12 +858,12 @@ td input {
   th,
   td {
     padding: 0 2px;
-    font-size: 0.68rem;
+    font-size: 0.72rem;
     line-height: 1;
   }
 
   th {
-    font-size: 0.66rem;
+    font-size: 0.7rem;
   }
 
   .event-table,
@@ -875,7 +878,7 @@ td input {
   }
 
   .log-table {
-    font-size: 0.64rem;
+    font-size: 0.68rem;
   }
 
   .log-table th:first-child,
@@ -887,6 +890,6 @@ td input {
   .notice {
     margin: 0;
     min-height: 0;
-    font-size: 0.66rem;
+    font-size: 0.7rem;
   }
 }
