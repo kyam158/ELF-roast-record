@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="ELF COFFEE ROASTERS の焙煎記録用ブラウザアプリ">
+  <title>ELF Roast Record</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="header-inner">
+      <div class="brand">
+        <img class="brand-logo" src="logo.png" alt="ELF COFFEE ROASTERS" onerror="this.classList.add('is-missing')">
+        <div>
+          <h1>ELF Roast Record</h1>
+          <p>COFFEE ROASTING RECORD</p>
+        </div>
+      </div>
+      <div class="status-badge" id="statusBadge" aria-live="polite">下書き保存済み</div>
+    </div>
+  </header>
+
+  <main class="page-shell">
+    <form id="roastForm" novalidate>
+      <section class="record-section" aria-labelledby="basic-title">
+        <div class="section-heading">
+          <span>1</span>
+          <h2 id="basic-title">基本情報</h2>
+        </div>
+        <div class="form-grid three">
+          <label class="field">
+            <span>焙煎日</span>
+            <input type="date" id="roastDate" name="roastDate">
+          </label>
+          <fieldset class="field radio-field">
+            <legend>天気</legend>
+            <div class="radio-row">
+              <label><input type="radio" name="weather" value="晴"> 晴</label>
+              <label><input type="radio" name="weather" value="曇"> 曇</label>
+              <label><input type="radio" name="weather" value="雨"> 雨</label>
+              <label><input type="radio" name="weather" value="雪"> 雪</label>
+            </div>
+          </fieldset>
+          <label class="field with-unit">
+            <span>気温</span>
+            <input type="number" id="airTemp" name="airTemp" step="0.1" inputmode="decimal">
+            <em>℃</em>
+          </label>
+        </div>
+      </section>
+
+      <section class="record-section" aria-labelledby="bean-title">
+        <div class="section-heading">
+          <span>2</span>
+          <h2 id="bean-title">生豆情報</h2>
+        </div>
+        <div class="form-grid">
+          <label class="field">
+            <span>国名</span>
+            <input type="text" id="country" name="country" autocomplete="off">
+          </label>
+          <label class="field">
+            <span>農園</span>
+            <input type="text" id="farm" name="farm" autocomplete="off">
+          </label>
+          <label class="field">
+            <span>品種</span>
+            <input type="text" id="variety" name="variety" autocomplete="off">
+          </label>
+          <label class="field">
+            <span>プロセス</span>
+            <input type="text" id="process" name="process" autocomplete="off">
+          </label>
+          <label class="field with-unit">
+            <span>標高</span>
+            <input type="number" id="altitude" name="altitude" step="1" inputmode="numeric">
+            <em>m</em>
+          </label>
+        </div>
+      </section>
+
+      <section class="record-section" aria-labelledby="charge-title">
+        <div class="section-heading">
+          <span>3</span>
+          <h2 id="charge-title">投入条件</h2>
+        </div>
+        <div class="form-grid">
+          <label class="field with-unit">
+            <span>生豆重量</span>
+            <input type="number" id="greenWeight" name="greenWeight" step="0.1" inputmode="decimal">
+            <em>g</em>
+          </label>
+          <label class="field with-unit">
+            <span>投入温度</span>
+            <input type="number" id="chargeTemp" name="chargeTemp" step="0.1" inputmode="decimal">
+            <em>℃</em>
+          </label>
+          <label class="field with-unit">
+            <span>焙煎後重量</span>
+            <input type="number" id="roastedWeight" name="roastedWeight" step="0.1" inputmode="decimal">
+            <em>g</em>
+          </label>
+          <label class="field with-unit">
+            <span>重量減少率</span>
+            <input type="text" id="weightLoss" name="weightLoss" readonly aria-describedby="weightNotice">
+            <em>%</em>
+          </label>
+        </div>
+        <p class="notice" id="weightNotice"></p>
+      </section>
+
+      <section class="record-section" aria-labelledby="events-title">
+        <div class="section-heading">
+          <span>4</span>
+          <h2 id="events-title">イベント</h2>
+        </div>
+        <div class="event-table-wrap">
+          <table class="event-table">
+            <thead>
+              <tr>
+                <th>イベント</th>
+                <th>時間</th>
+                <th>温度</th>
+              </tr>
+            </thead>
+            <tbody id="eventsBody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="record-section" aria-labelledby="phases-title">
+        <div class="section-heading">
+          <span>5</span>
+          <h2 id="phases-title">フェーズ</h2>
+        </div>
+        <p class="notice danger-text" id="phaseNotice"></p>
+        <div class="phase-table-wrap">
+          <table class="phase-table">
+            <thead>
+              <tr>
+                <th>フェーズ名</th>
+                <th>時間</th>
+                <th>割合</th>
+              </tr>
+            </thead>
+            <tbody id="phasesBody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="record-section" aria-labelledby="log-title">
+        <div class="section-heading">
+          <span>6</span>
+          <h2 id="log-title">1分ごとのログ</h2>
+        </div>
+        <div class="log-table-wrap" tabindex="0" aria-label="1分ごとのログ表">
+          <table class="log-table">
+            <thead>
+              <tr>
+                <th>時間</th>
+                <th>温度</th>
+                <th>ROR</th>
+                <th>ガス圧</th>
+                <th>ダンパー</th>
+              </tr>
+            </thead>
+            <tbody id="logBody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="record-section" aria-labelledby="memo-title">
+        <div class="section-heading">
+          <span>7</span>
+          <h2 id="memo-title">メモ</h2>
+        </div>
+        <label class="field">
+          <span>焙煎メモ</span>
+          <textarea id="memo" name="memo" rows="6"></textarea>
+        </label>
+      </section>
+
+      <section class="record-section actions-section" aria-labelledby="actions-title">
+        <div class="section-heading">
+          <span>8</span>
+          <h2 id="actions-title">操作ボタン</h2>
+        </div>
+        <div class="action-row">
+          <button type="button" class="primary" id="saveHistoryBtn">履歴に保存</button>
+          <button type="button" id="saveDraftBtn">下書き保存</button>
+          <button type="button" id="newRecordBtn">新規作成</button>
+          <button type="button" id="exportCsvBtn">CSV出力</button>
+          <button type="button" id="printBtn">A4印刷</button>
+          <button type="button" class="danger" id="deleteCurrentBtn">編集中の記録を削除</button>
+        </div>
+      </section>
+    </form>
+
+    <section class="record-section history-section" aria-labelledby="history-title">
+      <div class="section-heading">
+        <span>9</span>
+        <h2 id="history-title">履歴</h2>
+      </div>
+      <div class="history-tools">
+        <input type="search" id="historySearch" placeholder="履歴を検索" aria-label="履歴を検索">
+        <span id="historyCount">0件</span>
+      </div>
+      <div class="history-list" id="historyList"></div>
+    </section>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>
