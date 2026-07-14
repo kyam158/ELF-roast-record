@@ -674,11 +674,11 @@ td input {
 @media print {
   @page {
     size: A4;
-    margin: 4mm;
+    margin: 3mm 3mm 2.5mm;
   }
 
   html {
-    font-size: 7.4px;
+    font-size: 8.2px;
   }
 
   body {
@@ -707,8 +707,8 @@ td input {
   }
 
   .brand-logo {
-    width: 24px;
-    height: 24px;
+    width: 27px;
+    height: 27px;
   }
 
   .brand {
@@ -716,12 +716,12 @@ td input {
   }
 
   .brand h1 {
-    font-size: 1.25rem;
+    font-size: 1.32rem;
   }
 
   .brand p {
     margin-top: 0;
-    font-size: 0.75rem;
+    font-size: 0.78rem;
   }
 
   .record-section {
@@ -741,14 +741,14 @@ td input {
   }
 
   .section-heading span {
-    width: 13px;
-    height: 13px;
-    font-size: 0.68rem;
+    width: 14px;
+    height: 14px;
+    font-size: 0.72rem;
     box-shadow: none !important;
   }
 
   .section-heading h2 {
-    font-size: 0.9rem;
+    font-size: 0.96rem;
   }
 
   .form-grid,
@@ -770,11 +770,11 @@ td input {
   .field textarea,
   .history-tools input,
   td input {
-    min-height: 11px;
-    height: 11px;
+    min-height: 12px;
+    height: 12px;
     border-radius: 2px;
     padding: 0 2px;
-    font-size: 0.7rem;
+    font-size: 0.74rem;
     box-shadow: none !important;
   }
 
@@ -785,8 +785,8 @@ td input {
   }
 
   .field textarea {
-    min-height: 20px;
-    height: 20px;
+    min-height: 22px;
+    height: 22px;
   }
 
   .with-unit {
@@ -806,10 +806,10 @@ td input {
   }
 
   .radio-row label {
-    min-height: 11px;
+    min-height: 12px;
     border-radius: 2px;
     gap: 1px;
-    font-size: 0.64rem;
+    font-size: 0.68rem;
   }
 
   .weather-icon {
@@ -834,7 +834,7 @@ td input {
     gap: 6px;
     justify-content: flex-start;
     margin-bottom: 0;
-    font-size: 0.56rem;
+    font-size: 0.6rem;
   }
 
   .legend-line {
@@ -843,7 +843,7 @@ td input {
   }
 
   #roastChart {
-    height: 135px;
+    height: 150px;
   }
 
   .chart-empty-message {
@@ -855,12 +855,12 @@ td input {
   th,
   td {
     padding: 0 2px;
-    font-size: 0.64rem;
+    font-size: 0.68rem;
     line-height: 1;
   }
 
   th {
-    font-size: 0.62rem;
+    font-size: 0.66rem;
   }
 
   .event-table,
@@ -875,7 +875,7 @@ td input {
   }
 
   .log-table {
-    font-size: 0.6rem;
+    font-size: 0.64rem;
   }
 
   .log-table th:first-child,
@@ -887,6 +887,6 @@ td input {
   .notice {
     margin: 0;
     min-height: 0;
-    font-size: 0.62rem;
+    font-size: 0.66rem;
   }
 }
