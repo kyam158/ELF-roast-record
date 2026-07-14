@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ELF Roast Record</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main class="page">
+    <header class="app-header">
+      <img src="logo.png" alt="ELF logo" class="app-logo">
+      <div>
+        <p class="app-kicker">Coffee roasting log</p>
+        <h1>ELF Roast Record</h1>
+      </div>
+    </header>
+
+    <form id="roastForm" class="record-sheet">
+      <section class="section">
+        <div class="section-heading">
+          <h2>基本情報</h2>
+          <output id="roastIdDisplay" class="roast-id">未保存</output>
+        </div>
+        <div class="form-grid">
+          <label>
+            <span>焙煎日</span>
+            <input id="date" name="date" type="date">
+          </label>
+          <fieldset class="weather-field">
+            <legend>天気</legend>
+            <label><input type="radio" name="weather" value="晴"> 晴</label>
+            <label><input type="radio" name="weather" value="曇"> 曇</label>
+            <label><input type="radio" name="weather" value="雨"> 雨</label>
+            <label><input type="radio" name="weather" value="雪"> 雪</label>
+          </fieldset>
+          <label>
+            <span>気温</span>
+            <input id="airTemperature" name="airTemperature" type="number" inputmode="decimal" step="0.1" placeholder="℃">
+          </label>
+        </div>
+      </section>
+
+      <section class="section">
+        <h2>生豆情報</h2>
+        <div class="form-grid">
+          <label>
+            <span>国名</span>
+            <input id="country" name="country" type="text" autocomplete="off">
+          </label>
+          <label>
+            <span>農園</span>
+            <input id="farm" name="farm" type="text" autocomplete="off">
+          </label>
+          <label>
+            <span>品種</span>
+            <input id="variety" name="variety" type="text" autocomplete="off">
+          </label>
+          <label>
+            <span>プロセス</span>
+            <input id="process" name="process" type="text" autocomplete="off">
+          </label>
+          <label>
+            <span>標高</span>
+            <input id="altitude" name="altitude" type="text" autocomplete="off">
+          </label>
+        </div>
+      </section>
+
+      <section class="section">
+        <h2>投入条件</h2>
+        <div class="form-grid">
+          <label>
+            <span>生豆重量(g)</span>
+            <input id="greenWeight" name="greenWeight" type="number" inputmode="decimal" step="0.1">
+          </label>
+          <label>
+            <span>投入温度(℃)</span>
+            <input id="chargeTemperature" name="chargeTemperature" type="number" inputmode="decimal" step="0.1">
+          </label>
+          <label>
+            <span>焙煎後重量(g)</span>
+            <input id="roastedWeight" name="roastedWeight" type="number" inputmode="decimal" step="0.1">
+          </label>
+          <label>
+            <span>重量減少率(%)</span>
+            <input id="weightLoss" name="weightLoss" type="number" inputmode="decimal" step="0.1" readonly>
+          </label>
+        </div>
+      </section>
+
+      <section class="section">
+        <h2>イベント</h2>
+        <div class="event-grid">
+          <div class="event-label">イベント</div>
+          <div class="event-label">時間</div>
+          <div class="event-label">温度</div>
+
+          <div class="event-name">ボトム</div>
+          <input id="bottomTime" name="bottomTime" type="text" inputmode="numeric" placeholder="0:00">
+          <input id="bottomTemp" name="bottomTemp" type="number" inputmode="decimal" step="0.1" placeholder="℃">
+
+          <div class="event-name">ドライエンド</div>
+          <input id="dryEndTime" name="dryEndTime" type="text" inputmode="numeric" placeholder="5:00">
+          <input id="dryEndTemp" name="dryEndTemp" type="number" inputmode="decimal" step="0.1" placeholder="℃">
+
+          <div class="event-name">FC</div>
+          <input id="firstCrackTime" name="firstCrackTime" type="text" inputmode="numeric" placeholder="8:30">
+          <input id="firstCrackTemp" name="firstCrackTemp" type="number" inputmode="decimal" step="0.1" placeholder="℃">
+
+          <div class="event-name">END Temp</div>
+          <input id="endTempTime" name="endTempTime" type="text" inputmode="numeric" placeholder="10:30">
+          <input id="endTempTemp" name="endTempTemp" type="number" inputmode="decimal" step="0.1" placeholder="℃">
+        </div>
+      </section>
+
+      <section class="section">
+        <h2>フェーズ</h2>
+        <div class="phase-grid">
+          <div class="phase-label">フェーズ</div>
+          <div class="phase-label">時間</div>
+          <div class="phase-label">割合</div>
+
+          <div class="phase-name">Dry</div>
+          <input id="dryTime" name="dryTime" type="text" readonly>
+          <input id="dryRatio" name="dryRatio" type="text" readonly>
+
+          <div class="phase-name">Maillard</div>
+          <input id="maillardTime" name="maillardTime" type="text" readonly>
+          <input id="maillardRatio" name="maillardRatio" type="text" readonly>
+
+          <div class="phase-name">Development</div>
+          <input id="developmentTime" name="developmentTime" type="text" readonly>
+          <input id="developmentRatio" name="developmentRatio" type="text" readonly>
+
+          <div class="phase-name">Total Time</div>
+          <input id="totalTime" name="totalTime" type="text" readonly>
+          <input id="totalRatio" name="totalRatio" type="text" value="100.0%" readonly>
+        </div>
+      </section>
+
+      <section class="section">
+        <h2>ログ表</h2>
+        <div class="log-grid" aria-label="焙煎ログ">
+          <div class="log-head">時間</div>
+          <div class="log-head">温度</div>
+          <div class="log-head">ROR</div>
+          <div class="log-head">ガス圧</div>
+          <div class="log-head">ダンパー</div>
+
+          <div class="log-time">0:00</div><input type="number" inputmode="decimal" step="0.1" data-log-index="0" data-log-field="temperature"><input type="number" inputmode="decimal" step="0.1" data-log-index="0" data-log-field="ror"><input type="number" inputmode="decimal" step="0.1" data-log-index="0" data-log-field="gas"><input type="number" inputmode="decimal" step="0.1" data-log-index="0" data-log-field="damper">
+          <div class="log-time">1:00</div><input type="number" inputmode="decimal" step="0.1" data-log-index="1" data-log-field="temperature"><input type="number" inputmode="decimal" step="0.1" data-log-index="1" data-log-field="ror"><input type="number" inputmode="decimal" step="0.1" data-log-index="1" data-log-field="gas"><input type="number" inputmode="decimal" step="0.1" data-log-index="1" data-log-field="damper">
+          <div class="log-time">2:00</div><input type="number" inputmode="decimal" step="0.1" data-log-index="2" data-log-field="temperature"><input type="number" inputmode="decimal" step="0.1" data-log-index="2" data-log-field="ror"><input type="number" inputmode="decimal" step="0.1" data-log-index="2" data-log-field="gas"><input type="number" inputmode="decimal" step="0.1" data-log-index="2" data-log-field="damper">
+          <div class="log-time">3:00</div><input type="number" inputmode="decimal" step="0.1" data-log-index="3" data-log-field="temperature"><input type="number" inputmode="decimal" step="0.1" data-log-index="3" data-log-field="ror"><input type="number" inputmode="decimal" step="0.1" data-log-index="3" data-log-field="gas"><input type="number" inputmode="decimal" step="0.1" data-log-index="3" data-log-field="damper">
+          <div class="log-time">4:00</div><input type="number" inputmode="decimal" step="0.1" data-log-index="4" data-log-field="temperature"><input type="number" inputmode="decimal" step="0.1" data-log-index="4" data-log-field="ror"><input type="number" inputmode="decimal" step="0.1" data-log-index="4" data-log-field="gas"><input type="number" inputmode="decimal" step="0.1" data-log-index="4" data-log-field="damper">
+          <div class="log-time">5:00</div><input type="number" inputmode="decimal" step="0.1" data-log-index="5" data-log-field="temperature"><input type="number" inputmode="decimal" step="0.1" data-log-index="5" data-log-field="ror"><input type="number" inputmode="decimal" step="0.1" data-log-index="5" data-log-field="gas"><input type="number" inputmode="decimal" step="0.1" data-log-index="5" data-log-field="damper">
+          <div class="log-time">6:00</div><input type="number" inputmode="decimal" step="0.1" data-log-index="6" data-log-field="temperature"><input type="number" inputmode="decimal" step="0.1" data-log-index="6" data-log-field="ror"><input type="number" inputmode="decimal" step="0.1" data-log-index="6" data-log-field="gas"><input type="number" inputmode="decimal" step="0.1" data-log-index="6" data-log-field="damper">
+          <div class="log-time">7:00</div><input type="number" inputmode="decimal" step="0.1" data-log-index="7" data-log-field="temperature"><input type="number" inputmode="decimal" step="0.1" data-log-index="7" data-log-field="ror"><input type="number" inputmode="decimal" step="0.1" data-log-index="7" data-log-field="gas"><input type="number" inputmode="decimal" step="0.1" data-log-index="7" data-log-field="damper">
+          <div class="log-time">8:00</div><input type="number" inputmode="decimal" step="0.1" data-log-index="8" data-log-field="temperature"><input type="number" inputmode="decimal" step="0.1" data-log-index="8" data-log-field="ror"><input type="number" inputmode="decimal" step="0.1" data-log-index="8" data-log-field="gas"><input type="number" inputmode="decimal" step="0.1" data-log-index="8" data-log-field="damper">
+          <div class="log-time">9:00</div><input type="number" inputmode="decimal" step="0.1" data-log-index="9" data-log-field="temperature"><input type="number" inputmode="decimal" step="0.1" data-log-index="9" data-log-field="ror"><input type="number" inputmode="decimal" step="0.1" data-log-index="9" data-log-field="gas"><input type="number" inputmode="decimal" step="0.1" data-log-index="9" data-log-field="damper">
+          <div class="log-time">10:00</div><input type="number" inputmode="decimal" step="0.1" data-log-index="10" data-log-field="temperature"><input type="number" inputmode="decimal" step="0.1" data-log-index="10" data-log-field="ror"><input type="number" inputmode="decimal" step="0.1" data-log-index="10" data-log-field="gas"><input type="number" inputmode="decimal" step="0.1" data-log-index="10" data-log-field="damper">
+          <div class="log-time">11:00</div><input type="number" inputmode="decimal" step="0.1" data-log-index="11" data-log-field="temperature"><input type="number" inputmode="decimal" step="0.1" data-log-index="11" data-log-field="ror"><input type="number" inputmode="decimal" step="0.1" data-log-index="11" data-log-field="gas"><input type="number" inputmode="decimal" step="0.1" data-log-index="11" data-log-field="damper">
+          <div class="log-time">12:00</div><input type="number" inputmode="decimal" step="0.1" data-log-index="12" data-log-field="temperature"><input type="number" inputmode="decimal" step="0.1" data-log-index="12" data-log-field="ror"><input type="number" inputmode="decimal" step="0.1" data-log-index="12" data-log-field="gas"><input type="number" inputmode="decimal" step="0.1" data-log-index="12" data-log-field="damper">
+          <div class="log-time">13:00</div><input type="number" inputmode="decimal" step="0.1" data-log-index="13" data-log-field="temperature"><input type="number" inputmode="decimal" step="0.1" data-log-index="13" data-log-field="ror"><input type="number" inputmode="decimal" step="0.1" data-log-index="13" data-log-field="gas"><input type="number" inputmode="decimal" step="0.1" data-log-index="13" data-log-field="damper">
+          <div class="log-time">14:00</div><input type="number" inputmode="decimal" step="0.1" data-log-index="14" data-log-field="temperature"><input type="number" inputmode="decimal" step="0.1" data-log-index="14" data-log-field="ror"><input type="number" inputmode="decimal" step="0.1" data-log-index="14" data-log-field="gas"><input type="number" inputmode="decimal" step="0.1" data-log-index="14" data-log-field="damper">
+          <div class="log-time">15:00</div><input type="number" inputmode="decimal" step="0.1" data-log-index="15" data-log-field="temperature"><input type="number" inputmode="decimal" step="0.1" data-log-index="15" data-log-field="ror"><input type="number" inputmode="decimal" step="0.1" data-log-index="15" data-log-field="gas"><input type="number" inputmode="decimal" step="0.1" data-log-index="15" data-log-field="damper">
+        </div>
+      </section>
+
+      <section class="section">
+        <h2>メモ</h2>
+        <label class="memo-label">
+          <span>焙煎メモ</span>
+          <textarea id="memo" name="memo" rows="8"></textarea>
+        </label>
+      </section>
+
+      <div class="button-row">
+        <button type="button" id="saveButton">保存</button>
+        <button type="button" id="historyButton" class="secondary">履歴</button>
+        <button type="button" id="deleteButton" class="danger">削除</button>
+      </div>
+    </form>
+
+    <section id="historyPanel" class="history-panel" hidden>
+      <div class="section-heading">
+        <h2>履歴</h2>
+        <p id="historyCount" class="history-count">0件</p>
+      </div>
+      <div id="historyList" class="history-list" aria-live="polite"></div>
+    </section>
+
+    <template id="historyCardTemplate">
+      <button type="button" class="history-card">
+        <span class="history-date"></span>
+        <strong class="history-country"></strong>
+        <span class="history-variety"></span>
+      </button>
+    </template>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>
