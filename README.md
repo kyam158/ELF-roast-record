@@ -1,24 +1,34 @@
-# ELF Roast Record
+# ELF Roast Record Final
 
-焙煎士が毎日使う記録帳を想定した、軽量なコーヒー焙煎記録Webアプリです。
+ELF COFFEE ROASTERS 向けの軽量な焙煎記録ブラウザアプリです。
 
-## 構成
+## 概要
 
-- `index.html` - 画面構造
-- `style.css` - レイアウトと見た目
-- `script.js` - 計算、保存、読込、削除
-- `logo.png` - ELFロゴ
+- HTML5、CSS3、Vanilla JavaScript のみで実装
+- 外部ライブラリ、外部API、外部データベースは不使用
+- データはブラウザの `localStorage` に保存
+- 下書き保存、履歴保存、編集、複製、削除、CSV出力、A4印刷に対応
+- GitHub Pages で公開しやすいよう、公開ファイルはプロジェクト直下に配置
 
-## 機能
+## ファイル構成
 
-- 基本情報、生豆情報、投入条件の記録
-- 重量減少率の自動計算
-- イベント入力とフェーズ時間、割合の自動計算
-- 0:00から15:00までの固定ログ表
-- メモ入力
-- localStorageによるオートセーブ
-- 履歴保存、復元、削除
+```text
+ELF-Roast-Record-Final/
+  index.html
+  style.css
+  script.js
+  logo.png
+  README.md
+  .gitignore
+```
 
 ## 使い方
 
-`index.html` をブラウザで開いて使用します。外部ライブラリは使用していません。
+`index.html` をブラウザで開くと使用できます。GitHub Pages へ公開する場合は、このフォルダの中身を公開対象にしてください。
+
+保存データのキーは完成版専用です。
+
+- 履歴: `elfRoastRecordFinal.v1`
+- 下書き: `elfRoastRecordFinal.draft.v1`
+
+過去の試作版や別アプリの保存データとは共有しません。
