@@ -673,21 +673,23 @@ td input {
 
 @media print {
   @page {
-    size: A4;
-    margin: 8mm;
+    size: A4 portrait;
+    margin: 6mm;
   }
 
   html {
-    font-size: 9px;
+    font-size: 10px;
   }
 
   body {
     color: #000;
     background: #fff;
-    line-height: 1.12;
+    line-height: 1.16;
     min-width: 0;
-    width: 194mm;
+    width: 198mm;
+    min-height: 285mm;
     margin: 0 auto;
+    box-sizing: border-box;
   }
 
   .site-header {
@@ -696,10 +698,11 @@ td input {
 
   .header-inner,
   .page-shell {
-    width: 194mm;
+    width: 198mm;
     max-width: none;
     margin: 0 auto;
-    padding: 1px 0;
+    padding: 0;
+    box-sizing: border-box;
   }
 
   .status-badge,
@@ -710,8 +713,8 @@ td input {
   }
 
   .brand-logo {
-    width: 29px;
-    height: 29px;
+    width: 8mm;
+    height: 8mm;
   }
 
   .brand {
@@ -719,19 +722,20 @@ td input {
   }
 
   .brand h1 {
-    font-size: 1.38rem;
+    font-size: 1.5rem;
   }
 
   .brand p {
     margin-top: 0;
-    font-size: 0.82rem;
+    font-size: 0.88rem;
   }
 
   .record-section {
     break-inside: avoid;
     page-break-inside: avoid;
-    padding: 1px 0;
+    padding: 0.8mm 0;
     border-bottom: 1px solid #bbb;
+    box-sizing: border-box;
   }
 
   .record-section:first-child {
@@ -740,24 +744,24 @@ td input {
 
   .section-heading {
     gap: 4px;
-    margin-bottom: 1px;
+    margin-bottom: 0.8mm;
   }
 
   .section-heading span {
-    width: 15px;
-    height: 15px;
-    font-size: 0.76rem;
+    width: 4.4mm;
+    height: 4.4mm;
+    font-size: 0.82rem;
     box-shadow: none !important;
   }
 
   .section-heading h2 {
-    font-size: 1.02rem;
+    font-size: 1.12rem;
   }
 
   .form-grid,
   .form-grid.three {
     grid-template-columns: repeat(5, minmax(0, 1fr));
-    gap: 2px 4px;
+    gap: 0.8mm 1.4mm;
   }
 
   .field {
@@ -766,18 +770,18 @@ td input {
 
   .field span,
   .radio-field legend {
-    font-size: 0.8rem;
+    font-size: 0.88rem;
   }
 
   .field input,
   .field textarea,
   .history-tools input,
   td input {
-    min-height: 13px;
-    height: 13px;
+    min-height: 3.6mm;
+    height: 3.6mm;
     border-radius: 2px;
-    padding: 0 2px;
-    font-size: 0.78rem;
+    padding: 0 0.8mm;
+    font-size: 0.86rem;
     box-shadow: none !important;
   }
 
@@ -788,31 +792,31 @@ td input {
   }
 
   .field textarea {
-    min-height: 24px;
-    height: 24px;
+    min-height: 12mm;
+    height: 12mm;
   }
 
   .with-unit {
-    grid-template-columns: 1fr 12px;
+    grid-template-columns: 1fr 4mm;
   }
 
   .with-unit em {
     min-width: 0;
     padding-bottom: 1px;
-    font-size: 0.8rem;
+    font-size: 0.86rem;
   }
 
   .radio-row {
     grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 2px;
-    margin-top: 1px;
+    gap: 0.8mm;
+    margin-top: 0.5mm;
   }
 
   .radio-row label {
-    min-height: 13px;
+    min-height: 4mm;
     border-radius: 2px;
     gap: 1px;
-    font-size: 0.72rem;
+    font-size: 0.78rem;
   }
 
   .weather-icon {
@@ -830,23 +834,23 @@ td input {
   }
 
   .chart-wrapper {
-    padding: 1px;
+    padding: 0.8mm;
   }
 
   .chart-legend {
-    gap: 6px;
+    gap: 2.2mm;
     justify-content: flex-start;
     margin-bottom: 0;
-    font-size: 0.64rem;
+    font-size: 0.72rem;
   }
 
   .legend-line {
-    width: 13px;
+    width: 5mm;
     border-top-width: 1px;
   }
 
   #roastChart {
-    height: 162px;
+    height: 55mm;
   }
 
   .chart-empty-message {
@@ -857,13 +861,13 @@ td input {
 
   th,
   td {
-    padding: 0 2px;
-    font-size: 0.72rem;
+    padding: 0.15mm 0.8mm;
+    font-size: 0.78rem;
     line-height: 1;
   }
 
   th {
-    font-size: 0.7rem;
+    font-size: 0.76rem;
   }
 
   .event-table,
@@ -878,18 +882,18 @@ td input {
   }
 
   .log-table {
-    font-size: 0.68rem;
+    font-size: 0.74rem;
   }
 
   .log-table th:first-child,
   .log-table td:first-child {
-    width: 30px;
+    width: 10mm;
   }
 
   .memo-title,
   .notice {
     margin: 0;
     min-height: 0;
-    font-size: 0.7rem;
+    font-size: 0.76rem;
   }
 }
