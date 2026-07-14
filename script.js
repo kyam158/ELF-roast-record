@@ -4,10 +4,10 @@
   var STORAGE_KEY = "elfRoastRecordFinal.v1";
   var DRAFT_KEY = "elfRoastRecordFinal.draft.v1";
   var EVENTS = [
-    { key: "bottom", label: "ボトム" },
-    { key: "dryEnd", label: "ドライエンド" },
-    { key: "firstCrack", label: "FC（First Crack）" },
-    { key: "endTemp", label: "END Temp" }
+    { key: "bottom", label: "ボトム", placeholder: "1:20" },
+    { key: "dryEnd", label: "ドライエンド", placeholder: "5:00" },
+    { key: "firstCrack", label: "FC（First Crack）", placeholder: "8:30" },
+    { key: "endTemp", label: "END Temp", placeholder: "10:15" }
   ];
   var PHASES = ["Dry", "Maillard", "Development", "TOTAL"];
 
@@ -28,12 +28,17 @@
   var statusTimer = 0;
 
   initTables();
+  applyInputHints();
   bindEvents();
   loadInitialData();
   renderHistory();
   updateComputedFields();
 
   function bindEvents() {
+    form.addEventListener("submit", function (event) {
+      event.preventDefault();
+    });
+
     form.addEventListener("input", function (event) {
       if (event.target.matches("input, textarea")) {
         markEditing();
@@ -71,6 +76,13 @@
       }
     });
 
+    form.addEventListener("keydown", function (event) {
+      if (event.key === "Enter" && shouldMoveOnEnter(event.target)) {
+        event.preventDefault();
+        moveToNextInput(event.target);
+      }
+    });
+
     document.getElementById("saveHistoryBtn").addEventListener("click", saveHistory);
     document.getElementById("saveDraftBtn").addEventListener("click", saveDraft);
     document.getElementById("newRecordBtn").addEventListener("click", newRecord);
@@ -87,7 +99,7 @@
       var row = document.createElement("tr");
       row.innerHTML = [
         "<td>" + eventItem.label + "</td>",
-        "<td><input class=\"time-input\" type=\"text\" inputmode=\"numeric\" autocomplete=\"off\" data-event-time=\"" + eventItem.key + "\" aria-label=\"" + eventItem.label + " 時間\" placeholder=\"m:ss\"></td>",
+        "<td><input class=\"time-input\" type=\"text\" inputmode=\"numeric\" autocomplete=\"off\" data-event-time=\"" + eventItem.key + "\" aria-label=\"" + eventItem.label + " 時間\" placeholder=\"" + eventItem.placeholder + "\"></td>",
         "<td><input type=\"number\" step=\"0.1\" inputmode=\"decimal\" data-event-temp=\"" + eventItem.key + "\" aria-label=\"" + eventItem.label + " 温度\"></td>"
       ].join("");
       eventsBody.appendChild(row);
@@ -106,12 +118,18 @@
       logRow.innerHTML = [
         "<td>" + label + "</td>",
         "<td><input type=\"number\" step=\"0.1\" inputmode=\"decimal\" data-log=\"temp\" data-minute=\"" + minute + "\" aria-label=\"" + label + " 温度\"></td>",
-        "<td><input type=\"text\" inputmode=\"decimal\" data-log=\"ror\" data-minute=\"" + minute + "\" aria-label=\"" + label + " ROR\" readonly></td>",
+        "<td><input type=\"text\" inputmode=\"decimal\" data-log=\"ror\" data-minute=\"" + minute + "\" aria-label=\"" + label + " ROR\" readonly tabindex=\"-1\"></td>",
         "<td><input type=\"text\" inputmode=\"decimal\" data-log=\"gas\" data-minute=\"" + minute + "\" aria-label=\"" + label + " ガス圧\"></td>",
         "<td><input type=\"text\" inputmode=\"decimal\" data-log=\"damper\" data-minute=\"" + minute + "\" aria-label=\"" + label + " ダンパー\"></td>"
       ].join("");
       logBody.appendChild(logRow);
     }
+  }
+
+  function applyInputHints() {
+    getMoveTargets().forEach(function (input, index, inputs) {
+      input.setAttribute("enterkeyhint", index === inputs.length - 1 ? "done" : "next");
+    });
   }
 
   function loadInitialData() {
@@ -591,6 +609,29 @@
   function setStatus(text) {
     window.clearTimeout(statusTimer);
     statusBadge.textContent = text;
+  }
+
+  function shouldMoveOnEnter(target) {
+    return target.matches("input, select") &&
+      !target.matches("[type=\"button\"], [type=\"submit\"], [type=\"reset\"], [type=\"radio\"], [readonly], [disabled]");
+  }
+
+  function moveToNextInput(currentInput) {
+    var inputs = getMoveTargets();
+    var index = inputs.indexOf(currentInput);
+    if (index >= 0 && index < inputs.length - 1) {
+      inputs[index + 1].focus();
+      if (typeof inputs[index + 1].select === "function") {
+        inputs[index + 1].select();
+      }
+    }
+  }
+
+  function getMoveTargets() {
+    return Array.prototype.slice.call(form.querySelectorAll("input, select, textarea"))
+      .filter(function (input) {
+        return !input.matches("[type=\"button\"], [type=\"submit\"], [type=\"reset\"], [type=\"radio\"], [readonly], [disabled], [tabindex=\"-1\"]");
+      });
   }
 
   function flashStatus(text, fallback) {
