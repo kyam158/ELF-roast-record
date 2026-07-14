@@ -36,10 +36,10 @@
           <fieldset class="field radio-field">
             <legend>天気</legend>
             <div class="radio-row">
-              <label><input type="radio" name="weather" value="晴"> 晴</label>
-              <label><input type="radio" name="weather" value="曇"> 曇</label>
-              <label><input type="radio" name="weather" value="雨"> 雨</label>
-              <label><input type="radio" name="weather" value="雪"> 雪</label>
+              <label><input type="radio" name="weather" value="晴"><span class="weather-icon" aria-hidden="true">☀️</span><span>晴</span></label>
+              <label><input type="radio" name="weather" value="曇"><span class="weather-icon" aria-hidden="true">☁️</span><span>曇</span></label>
+              <label><input type="radio" name="weather" value="雨"><span class="weather-icon" aria-hidden="true">🌧</span><span>雨</span></label>
+              <label><input type="radio" name="weather" value="雪"><span class="weather-icon" aria-hidden="true">❄️</span><span>雪</span></label>
             </div>
           </fieldset>
           <label class="field with-unit">
@@ -74,7 +74,7 @@
           </label>
           <label class="field with-unit">
             <span>標高</span>
-            <input type="number" id="altitude" name="altitude" step="1" inputmode="numeric">
+            <input type="number" id="altitude" name="altitude" step="1" inputmode="decimal">
             <em>m</em>
           </label>
         </div>

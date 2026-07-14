@@ -32,9 +32,11 @@ select,
 textarea {
   font: inherit;
   font-size: 16px;
+  -webkit-text-size-adjust: 100%;
 }
 
 button {
+  min-width: 44px;
   min-height: 48px;
   border: 1px solid var(--elf-green);
   border-radius: 8px;
@@ -63,6 +65,13 @@ button.primary:focus-visible {
 button.danger {
   color: var(--danger);
   border-color: var(--danger);
+}
+
+input,
+textarea,
+select {
+  -webkit-appearance: none;
+  appearance: none;
 }
 
 img {
@@ -144,6 +153,11 @@ img {
   border-bottom: 1px solid var(--line);
 }
 
+.record-section.is-active .section-heading span {
+  background: #183727;
+  box-shadow: 0 0 0 4px rgba(35, 75, 54, 0.14);
+}
+
 .record-section:first-child {
   border-top: 1px solid var(--line);
 }
@@ -202,6 +216,7 @@ img {
   padding: 10px 12px;
   color: var(--text);
   background: #fff;
+  transition: border-color 0.15s ease, background-color 0.15s ease, box-shadow 0.15s ease;
 }
 
 .field textarea {
@@ -211,9 +226,12 @@ img {
 
 .field input:focus,
 .field textarea:focus,
-.history-tools input:focus {
+.history-tools input:focus,
+td input:focus {
   outline: 2px solid rgba(35, 75, 54, 0.22);
   border-color: var(--elf-green);
+  background: #fbfdfb;
+  box-shadow: 0 0 0 3px rgba(35, 75, 54, 0.12);
 }
 
 .with-unit {
@@ -242,19 +260,45 @@ img {
 .radio-row {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 8px;
+  gap: 6px;
   margin-top: 7px;
 }
 
 .radio-row label {
   display: flex;
+  position: relative;
   min-height: 48px;
   align-items: center;
   justify-content: center;
-  gap: 6px;
+  gap: 4px;
   border: 1px solid var(--line);
   border-radius: 8px;
   background: #fff;
+  text-align: center;
+  font-weight: 700;
+}
+
+.radio-row input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  opacity: 0;
+}
+
+.radio-row label:has(input:checked) {
+  border-color: var(--elf-green);
+  background: var(--elf-green-light);
+}
+
+.weather-icon {
+  display: inline-grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  font-size: 0.95rem;
+  line-height: 1;
 }
 
 .notice {
@@ -309,6 +353,7 @@ td input {
   border-radius: 6px;
   padding: 8px 10px;
   background: #fff;
+  transition: border-color 0.15s ease, background-color 0.15s ease, box-shadow 0.15s ease;
 }
 
 .event-table {
@@ -435,9 +480,20 @@ td input {
 }
 
 @media (max-width: 560px) {
+  body {
+    line-height: 1.55;
+  }
+
+  .header-inner,
+  .page-shell {
+    padding-left: 14px;
+    padding-right: 14px;
+  }
+
   .header-inner {
     align-items: flex-start;
     flex-direction: column;
+    gap: 12px;
   }
 
   .brand-logo {
@@ -451,19 +507,88 @@ td input {
   }
 
   .radio-row {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 5px;
+  }
+
+  .radio-row label {
+    min-height: 44px;
+    padding: 4px 2px;
+    gap: 2px;
+    font-size: 0.88rem;
+  }
+
+  .weather-icon {
+    width: 16px;
+    height: 16px;
+    font-size: 0.82rem;
+  }
+
+  .record-section {
+    padding: 20px 0;
+  }
+
+  .section-heading {
+    margin-bottom: 14px;
+  }
+
+  .field input,
+  .field textarea,
+  .history-tools input {
+    min-height: 52px;
+  }
+
+  button {
+    min-height: 52px;
+  }
+
+  .event-table,
+  .log-table {
+    min-width: 0;
+    table-layout: fixed;
+  }
+
+  th,
+  td {
+    padding: 7px 4px;
+    font-size: 0.82rem;
+  }
+
+  td input {
+    min-height: 44px;
+    padding: 7px 5px;
+  }
+
+  .event-table th:first-child,
+  .event-table td:first-child {
+    width: 34%;
+  }
+
+  .log-table th:first-child,
+  .log-table td:first-child {
+    width: 54px;
+  }
+
+  .log-table-wrap {
+    overflow-x: hidden;
   }
 }
 
 @media print {
   @page {
     size: A4;
-    margin: 12mm;
+    margin: 5mm;
+  }
+
+  html {
+    font-size: 8px;
   }
 
   body {
     color: #000;
     background: #fff;
+    line-height: 1.12;
+    min-width: 0;
   }
 
   .site-header {
@@ -474,18 +599,86 @@ td input {
   .page-shell {
     width: 100%;
     max-width: none;
-    padding: 8px 0;
+    padding: 3px 0;
   }
 
   .status-badge,
   .actions-section,
-  .history-section {
+  .history-section,
+  .notice:empty {
     display: none;
+  }
+
+  .brand-logo {
+    width: 30px;
+    height: 30px;
+  }
+
+  .brand {
+    gap: 6px;
+  }
+
+  .brand h1 {
+    font-size: 1.45rem;
+  }
+
+  .brand p {
+    margin-top: 0;
+    font-size: 0.75rem;
   }
 
   .record-section {
     break-inside: avoid;
-    padding: 12px 0;
+    page-break-inside: avoid;
+    padding: 3px 0;
+    border-bottom: 1px solid #bbb;
+  }
+
+  .record-section:first-child {
+    border-top: 0;
+  }
+
+  .section-heading {
+    gap: 5px;
+    margin-bottom: 3px;
+  }
+
+  .section-heading span {
+    width: 15px;
+    height: 15px;
+    font-size: 0.75rem;
+    box-shadow: none !important;
+  }
+
+  .section-heading h2 {
+    font-size: 1rem;
+  }
+
+  .form-grid,
+  .form-grid.three {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 4px 6px;
+  }
+
+  .field {
+    gap: 1px;
+  }
+
+  .field span,
+  .radio-field legend {
+    font-size: 0.75rem;
+  }
+
+  .field input,
+  .field textarea,
+  .history-tools input,
+  td input {
+    min-height: 14px;
+    height: 14px;
+    border-radius: 2px;
+    padding: 1px 3px;
+    font-size: 0.8rem;
+    box-shadow: none !important;
   }
 
   button,
@@ -494,7 +687,82 @@ td input {
     border-color: #999;
   }
 
+  .field textarea {
+    min-height: 28px;
+    height: 28px;
+  }
+
+  .with-unit {
+    grid-template-columns: 1fr 12px;
+  }
+
+  .with-unit em {
+    min-width: 0;
+    padding-bottom: 1px;
+    font-size: 0.75rem;
+  }
+
+  .radio-row {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 2px;
+    margin-top: 1px;
+  }
+
+  .radio-row label {
+    min-height: 14px;
+    border-radius: 2px;
+    gap: 1px;
+    font-size: 0.72rem;
+  }
+
+  .weather-icon {
+    width: 10px;
+    height: 10px;
+    font-size: 0.62rem;
+  }
+
+  .event-table-wrap,
+  .phase-table-wrap,
+  .log-table-wrap {
+    overflow: visible;
+    border-radius: 0;
+  }
+
+  th,
+  td {
+    padding: 1px 3px;
+    font-size: 0.72rem;
+    line-height: 1.05;
+  }
+
+  th {
+    font-size: 0.7rem;
+  }
+
+  .event-table,
   .log-table {
     min-width: 0;
+    table-layout: fixed;
+  }
+
+  .event-table th:first-child,
+  .event-table td:first-child {
+    width: 28%;
+  }
+
+  .log-table {
+    font-size: 0.68rem;
+  }
+
+  .log-table th:first-child,
+  .log-table td:first-child {
+    width: 36px;
+  }
+
+  .memo-title,
+  .notice {
+    margin: 1px 0 0;
+    min-height: 0;
+    font-size: 0.7rem;
   }
 }

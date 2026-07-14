@@ -25,6 +25,7 @@
 
   var currentId = "";
   var saveTimer = 0;
+  var statusTimer = 0;
 
   initTables();
   bindEvents();
@@ -57,9 +58,16 @@
 
     form.addEventListener("focusin", function (event) {
       if (event.target.matches("input, textarea")) {
+        setActiveSection(event.target);
         setTimeout(function () {
           event.target.scrollIntoView({ block: "center", behavior: "smooth" });
         }, 80);
+      }
+    });
+
+    form.addEventListener("focusout", function (event) {
+      if (event.target.matches("input, textarea")) {
+        window.setTimeout(clearActiveSection, 0);
       }
     });
 
@@ -98,7 +106,7 @@
       logRow.innerHTML = [
         "<td>" + label + "</td>",
         "<td><input type=\"number\" step=\"0.1\" inputmode=\"decimal\" data-log=\"temp\" data-minute=\"" + minute + "\" aria-label=\"" + label + " 温度\"></td>",
-        "<td><input type=\"text\" data-log=\"ror\" data-minute=\"" + minute + "\" aria-label=\"" + label + " ROR\" readonly></td>",
+        "<td><input type=\"text\" inputmode=\"decimal\" data-log=\"ror\" data-minute=\"" + minute + "\" aria-label=\"" + label + " ROR\" readonly></td>",
         "<td><input type=\"text\" inputmode=\"decimal\" data-log=\"gas\" data-minute=\"" + minute + "\" aria-label=\"" + label + " ガス圧\"></td>",
         "<td><input type=\"text\" inputmode=\"decimal\" data-log=\"damper\" data-minute=\"" + minute + "\" aria-label=\"" + label + " ダンパー\"></td>"
       ].join("");
@@ -581,7 +589,33 @@
   }
 
   function setStatus(text) {
+    window.clearTimeout(statusTimer);
     statusBadge.textContent = text;
+  }
+
+  function flashStatus(text, fallback) {
+    window.clearTimeout(statusTimer);
+    statusBadge.textContent = text;
+    statusTimer = window.setTimeout(function () {
+      statusBadge.textContent = fallback;
+    }, 1000);
+  }
+
+  function setActiveSection(target) {
+    clearActiveSection();
+    var section = target.closest(".record-section");
+    if (section) {
+      section.classList.add("is-active");
+    }
+  }
+
+  function clearActiveSection() {
+    if (form.querySelector(":focus")) {
+      return;
+    }
+    form.querySelectorAll(".record-section.is-active").forEach(function (section) {
+      section.classList.remove("is-active");
+    });
   }
 
   function valueOf(id) {
