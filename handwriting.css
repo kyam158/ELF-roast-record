@@ -203,10 +203,17 @@ h2 {
 .log-grid {
   grid-template-columns: repeat(2, minmax(0, 1fr));
   height: calc(100% - 4.4mm);
+  width: 100%;
+  min-width: 0;
 }
 
 .log-table {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
   height: 100%;
+  overflow: hidden;
+  box-sizing: border-box;
   font-size: 8.3pt;
 }
 
@@ -218,14 +225,11 @@ h2 {
   height: 8.35mm;
 }
 
-.log-table th:first-child,
-.log-table td:first-child {
-  width: 12%;
-}
-
-.log-table th:not(:first-child),
-.log-table td:not(:first-child) {
-  width: 22%;
+.log-table th,
+.log-table td {
+  min-width: 0;
+  overflow: hidden;
+  box-sizing: border-box;
 }
 
 .memo-section {
@@ -244,22 +248,120 @@ h2 {
 
 @page {
   size: A4 landscape;
-  margin: 6mm;
+  margin: 5mm;
 }
 
 @media print {
   html,
   body {
-    width: auto;
-    height: auto;
-    margin: 0;
-    padding: 0;
+    width: 287mm;
+    height: 200mm;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
     background: #fff;
   }
 
-  .sheet {
+  .handwriting-sheet,
+  .handwriting-page {
+    width: 287mm;
+    height: 200mm;
+    max-width: none !important;
+    max-height: 200mm;
+    margin: 0 auto !important;
+    padding: 0 !important;
+    overflow: hidden;
+    box-sizing: border-box;
+    grid-template-rows: 14mm 34mm 34mm 80mm 24mm;
+    gap: 3mm;
+  }
+
+  .sheet-header {
+    padding: 1.5mm 3mm;
+  }
+
+  .brand img {
+    width: 10mm;
+    height: 10mm;
+  }
+
+  h1 {
+    font-size: 17pt;
+  }
+
+  .panel {
+    padding: 1.4mm 1.7mm;
+    overflow: hidden;
+  }
+
+  h2 {
+    margin-bottom: 1mm;
+    font-size: 9.5pt;
+  }
+
+  .line-field {
+    min-height: 6.4mm;
+  }
+
+  .weather-row {
+    min-height: 7.2mm;
+  }
+
+  .event-phase-grid .write-table {
+    height: calc(100% - 3.8mm);
+  }
+
+  .log-section {
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr);
+    gap: 1mm;
+    padding-bottom: 1.4mm;
+  }
+
+  .log-grid {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 4mm;
     width: 100%;
-    height: 198mm;
-    margin: 0;
+    min-width: 0;
+    height: auto;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .log-table {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    height: 100%;
+    table-layout: fixed;
+    border-collapse: collapse;
+    overflow: hidden;
+    box-sizing: border-box;
+  }
+
+  .log-table th {
+    height: 6mm;
+  }
+
+  .log-table tbody tr {
+    height: 8.1mm;
+  }
+
+  .log-table th,
+  .log-table td {
+    padding: 0.5mm 0.8mm;
+    min-width: 0;
+    overflow: hidden;
+    box-sizing: border-box;
+  }
+
+  .memo-section {
+    height: 24mm;
+    min-height: 0;
+    padding-bottom: 1.2mm;
+  }
+
+  .memo-lines {
+    height: calc(100% - 3.8mm);
   }
 }
