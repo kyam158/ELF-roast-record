@@ -30,6 +30,7 @@
   let roastChartContext = null;
   let chartResizeObserver = null;
   let chartUpdateTimer = 0;
+  let chartPrintMode = false;
 
   initTables();
   initializeRoastChart();
@@ -657,6 +658,8 @@
     } else {
       window.addEventListener("resize", resizeRoastChart);
     }
+    window.addEventListener("beforeprint", prepareChartForPrint);
+    window.addEventListener("afterprint", restoreChartAfterPrint);
   }
 
   function collectChartData() {
@@ -715,11 +718,12 @@
     wrapper.classList.add("has-data");
     const size = resizeRoastChart(false);
     const ctx = roastChartContext;
+    const isPrint = isChartPrintMode();
     const plot = {
-      left: size.width < 560 ? 38 : 52,
-      right: size.width < 560 ? 38 : 50,
-      top: 18,
-      bottom: size.width < 560 ? 32 : 40
+      left: isPrint ? 34 : (size.width < 560 ? 38 : 52),
+      right: isPrint ? 34 : (size.width < 560 ? 38 : 50),
+      top: isPrint ? 12 : 18,
+      bottom: isPrint ? 20 : (size.width < 560 ? 32 : 40)
     };
     plot.width = size.width - plot.left - plot.right;
     plot.height = size.height - plot.top - plot.bottom;
@@ -740,7 +744,7 @@
     ctx.lineWidth = 1;
     ctx.strokeStyle = "#e8eee9";
     ctx.fillStyle = "#68746d";
-    ctx.font = (isNarrow ? "10px" : "12px") + " -apple-system, BlinkMacSystemFont, sans-serif";
+    ctx.font = (isChartPrintMode() ? "8px" : (isNarrow ? "10px" : "12px")) + " -apple-system, BlinkMacSystemFont, sans-serif";
     ctx.textAlign = "center";
     ctx.textBaseline = "top";
 
@@ -791,7 +795,7 @@
   function drawTemperatureLine(ctx, plot, scales, points) {
     drawSegmentedLine(ctx, points, scales.x, scales.tempY, {
       color: "#234b36",
-      width: 2.6,
+      width: isChartPrintMode() ? 1.8 : 2.6,
       dash: []
     });
   }
@@ -799,7 +803,7 @@
   function drawRorLine(ctx, plot, scales, points) {
     drawSegmentedLine(ctx, points, scales.x, scales.rorY, {
       color: "#7b6a56",
-      width: 2.2,
+      width: isChartPrintMode() ? 1.6 : 2.2,
       dash: [7, 5]
     });
   }
@@ -811,7 +815,7 @@
     ctx.strokeStyle = "rgba(35, 75, 54, 0.48)";
     ctx.fillStyle = "#234b36";
     ctx.lineWidth = 1;
-    ctx.font = "10px -apple-system, BlinkMacSystemFont, sans-serif";
+    ctx.font = (isChartPrintMode() ? "8px" : "10px") + " -apple-system, BlinkMacSystemFont, sans-serif";
     ctx.textAlign = "center";
     ctx.textBaseline = "top";
     ctx.setLineDash([3, 4]);
@@ -820,7 +824,7 @@
       const x = scales.x(eventItem.minute);
       const slot = Math.round(x / 34);
       labelRows[slot] = (labelRows[slot] || 0) + 1;
-      const labelY = plot.top + 4 + ((labelRows[slot] - 1) % 3) * 13;
+      const labelY = plot.top + 3 + ((labelRows[slot] - 1) % 3) * (isChartPrintMode() ? 9 : 13);
 
       ctx.beginPath();
       ctx.moveTo(x, plot.top);
@@ -838,7 +842,7 @@
 
     const rect = roastChartCanvas.getBoundingClientRect();
     const width = Math.max(320, Math.round(rect.width));
-    const height = Math.max(180, Math.round(rect.height));
+    const height = Math.max(isChartPrintMode() ? 90 : 180, Math.round(rect.height));
     const ratio = window.devicePixelRatio || 1;
     const pixelWidth = Math.round(width * ratio);
     const pixelHeight = Math.round(height * ratio);
@@ -873,6 +877,22 @@
     }
     window.clearTimeout(chartUpdateTimer);
     chartUpdateTimer = window.setTimeout(drawRoastChart, 80);
+  }
+
+  function prepareChartForPrint() {
+    chartPrintMode = true;
+    window.clearTimeout(chartUpdateTimer);
+    drawRoastChart();
+  }
+
+  function restoreChartAfterPrint() {
+    chartPrintMode = false;
+    window.clearTimeout(chartUpdateTimer);
+    drawRoastChart();
+  }
+
+  function isChartPrintMode() {
+    return chartPrintMode || (window.matchMedia && window.matchMedia("print").matches);
   }
 
   function drawSegmentedLine(ctx, points, xScale, yScale, options) {

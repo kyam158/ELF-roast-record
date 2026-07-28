@@ -867,30 +867,49 @@ td input {
   }
 
   .chart-wrapper {
-    padding: 0.6mm;
-    min-height: 0;
+    min-height: 0 !important;
     height: auto;
-    aspect-ratio: auto;
+    overflow: hidden;
+    aspect-ratio: auto !important;
+  }
+
+  .chart-wrapper:not(.has-data) {
+    display: none !important;
+  }
+
+  .chart-wrapper.has-data {
+    display: grid;
+    grid-template-rows: 2.8mm minmax(0, 1fr);
+    row-gap: 0.2mm;
+    height: 42mm;
+    min-height: 0 !important;
+    max-height: 42mm;
+    padding: 0.35mm;
+    overflow: hidden;
+    aspect-ratio: auto !important;
   }
 
   .chart-legend {
-    gap: 1.8mm;
+    gap: 1.4mm;
     justify-content: flex-start;
-    margin-bottom: 0;
-    font-size: 0.64rem;
+    align-items: center;
+    margin: 0;
+    min-height: 0;
+    line-height: 1;
+    font-size: 0.56rem;
   }
 
   .legend-line {
-    width: 4.2mm;
+    width: 3.8mm;
     border-top-width: 1px;
   }
 
   #roastChart {
     display: block;
     width: 100% !important;
-    height: 51mm !important;
+    height: 100% !important;
     min-height: 0 !important;
-    max-height: none !important;
+    max-height: 100% !important;
     aspect-ratio: auto !important;
   }
 
