@@ -18,18 +18,30 @@ html {
 
 body {
   margin: 0;
+  padding: 0;
+  min-width: 0;
+  overflow-x: hidden;
+  background: #f4f7f5;
+}
+
+.handwriting-preview {
+  width: 100%;
+  min-width: 0;
   padding: 16px;
+  overflow: hidden;
+  box-sizing: border-box;
 }
 
 .sheet {
-  width: 285mm;
-  height: 198mm;
-  margin: 0 auto;
+  width: 287mm;
+  height: 200mm;
+  margin: 0;
   padding: 0;
   display: grid;
-  grid-template-rows: 16mm 42mm 36mm 78mm 18mm;
+  grid-template-rows: 14mm 34mm 34mm 80mm 24mm;
   gap: 2mm;
   background: #fff;
+  transform-origin: top left;
 }
 
 .sheet-header,
@@ -89,16 +101,22 @@ h1 {
 }
 
 .top-grid {
-  grid-template-columns: 22fr 48fr 30fr;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.6fr) minmax(0, 1fr);
+  width: 100%;
+  min-width: 0;
 }
 
 .event-phase-grid {
-  grid-template-columns: 58fr 42fr;
+  grid-template-columns: minmax(0, 1.45fr) minmax(0, 0.85fr);
+  width: 100%;
+  min-width: 0;
 }
 
 .panel {
   min-width: 0;
+  max-width: 100%;
   padding: 1.8mm 2mm;
+  overflow: hidden;
 }
 
 h2 {
@@ -201,10 +219,13 @@ h2 {
 }
 
 .log-grid {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 3mm;
   height: calc(100% - 4.4mm);
   width: 100%;
   min-width: 0;
+  box-sizing: border-box;
+  overflow: hidden;
 }
 
 .log-table {
@@ -254,25 +275,37 @@ h2 {
 @media print {
   html,
   body {
-    width: 287mm;
-    height: 200mm;
+    width: auto !important;
+    height: auto !important;
+    min-width: 0 !important;
+    min-height: 0 !important;
     margin: 0 !important;
     padding: 0 !important;
-    overflow: hidden !important;
-    background: #fff;
+    overflow: visible !important;
+    background: #fff !important;
+  }
+
+  .handwriting-preview {
+    width: auto !important;
+    height: auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: visible !important;
   }
 
   .handwriting-sheet,
   .handwriting-page {
-    width: 287mm;
-    height: 200mm;
-    max-width: none !important;
-    max-height: 200mm;
+    width: 284mm !important;
+    height: 196mm !important;
+    max-width: 284mm !important;
+    max-height: 196mm !important;
     margin: 0 auto !important;
     padding: 0 !important;
-    overflow: hidden;
-    box-sizing: border-box;
-    grid-template-rows: 14mm 34mm 34mm 80mm 24mm;
+    overflow: hidden !important;
+    box-sizing: border-box !important;
+    transform: none !important;
+    transform-origin: initial !important;
+    grid-template-rows: 14mm 34mm 34mm 78mm 24mm;
     gap: 3mm;
   }
 
