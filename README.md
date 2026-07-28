@@ -17,6 +17,10 @@ ELF-Roast-Record-Final/
   index.html
   style.css
   script.js
+  handwriting.html
+  handwriting.css
+  handwriting.js
+  handwriting-sheet.pdf
   logo.png
   README.md
   .gitignore
@@ -32,3 +36,26 @@ ELF-Roast-Record-Final/
 - 下書き: `elfRoastRecordFinal.draft.v1`
 
 過去の試作版や別アプリの保存データとは共有しません。
+
+## 手書き用PDF
+
+通常画面の「手書き用紙」ボタンは、A4横1ページの固定PDF `handwriting-sheet.pdf` を開きます。
+
+PDFの元ファイルは `handwriting.html`、`handwriting.css`、`handwriting.js` です。レイアウトを変更した場合は、以下のようにChromeでPDFを再生成してください。
+
+```bash
+HTML_URL=$(python3 -c 'from pathlib import Path; print(Path("handwriting.html").resolve().as_uri())')
+
+"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" \
+  --headless \
+  --disable-gpu \
+  --no-sandbox \
+  --print-to-pdf=handwriting-sheet.pdf \
+  "$HTML_URL"
+```
+
+生成後は以下でA4横1ページであることを確認します。
+
+```bash
+pdfinfo handwriting-sheet.pdf
+```
