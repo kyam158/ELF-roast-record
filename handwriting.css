@@ -430,20 +430,53 @@ h2 {
 
 @supports (-webkit-touch-callout: none) {
   @media print {
+    html,
+    body,
+    .handwriting-preview,
+    .handwriting-stage {
+      min-height: 0 !important;
+      margin-bottom: 0 !important;
+      padding-bottom: 0 !important;
+      overflow: hidden !important;
+      break-after: avoid-page !important;
+      page-break-after: avoid !important;
+      break-inside: auto !important;
+      page-break-inside: auto !important;
+    }
+
     .handwriting-sheet,
     .handwriting-page {
       width: 279mm !important;
-      height: 190mm !important;
+      height: auto !important;
       max-width: 279mm !important;
       max-height: 190mm !important;
+      min-height: 0 !important;
+      margin-bottom: 0 !important;
+      padding-bottom: 0 !important;
       grid-template-rows: 14mm 34mm 34mm 74mm 15mm;
       gap: 1mm !important;
+      overflow: hidden !important;
+      break-after: avoid-page !important;
+      page-break-after: avoid !important;
+      break-inside: auto !important;
+      page-break-inside: auto !important;
+    }
+
+    .handwriting-sheet:last-child,
+    .handwriting-page:last-child {
+      height: auto !important;
+      margin-bottom: 0 !important;
+      padding-bottom: 0 !important;
+      break-after: avoid-page !important;
+      page-break-after: avoid !important;
     }
 
     .memo-section {
       height: 15mm !important;
       margin-bottom: 0 !important;
       padding-bottom: 0 !important;
+      break-after: avoid-page !important;
+      page-break-after: avoid !important;
     }
 
     .memo-lines,
@@ -451,6 +484,8 @@ h2 {
     .handwriting-sheet > :last-child {
       margin-bottom: 0 !important;
       padding-bottom: 0 !important;
+      break-after: avoid-page !important;
+      page-break-after: avoid !important;
     }
   }
 }
