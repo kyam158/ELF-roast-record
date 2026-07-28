@@ -242,7 +242,7 @@ h2 {
   width: 100%;
   min-width: 0;
   max-width: 100%;
-  height: auto;
+  height: 59mm;
   overflow: hidden;
   box-sizing: border-box;
   font-size: 8.3pt;
@@ -378,7 +378,7 @@ h2 {
     width: 100%;
     min-width: 0;
     max-width: 100%;
-    height: auto;
+    height: 56mm;
     table-layout: fixed;
     border-collapse: collapse;
     overflow: hidden;
