@@ -18,6 +18,7 @@ html {
 
 body {
   margin: 0;
+  width: 100%;
   padding: 0;
   min-width: 0;
   overflow-x: hidden;
@@ -26,19 +27,28 @@ body {
 
 .handwriting-preview {
   width: 100%;
+  max-width: 100vw;
   min-width: 0;
-  padding: 16px;
+  padding: 12px;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.handwriting-stage {
+  position: relative;
+  width: 100%;
+  min-width: 0;
   overflow: hidden;
   box-sizing: border-box;
 }
 
 .sheet {
-  width: 287mm;
-  height: 200mm;
+  width: 1122px;
+  height: 794px;
   margin: 0;
   padding: 0;
   display: grid;
-  grid-template-rows: 14mm 34mm 34mm 80mm 24mm;
+  grid-template-rows: 14mm 34mm 34mm 74mm 24mm;
   gap: 2mm;
   background: #fff;
   transform-origin: top left;
@@ -221,7 +231,7 @@ h2 {
 .log-grid {
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   gap: 3mm;
-  height: calc(100% - 4.4mm);
+  height: auto;
   width: 100%;
   min-width: 0;
   box-sizing: border-box;
@@ -232,18 +242,18 @@ h2 {
   width: 100%;
   min-width: 0;
   max-width: 100%;
-  height: 100%;
+  height: auto;
   overflow: hidden;
   box-sizing: border-box;
   font-size: 8.3pt;
 }
 
 .log-table th {
-  height: 6mm;
+  height: 5.8mm;
 }
 
 .log-table tbody tr {
-  height: 8.35mm;
+  height: 7.6mm;
 }
 
 .log-table th,
@@ -285,7 +295,8 @@ h2 {
     background: #fff !important;
   }
 
-  .handwriting-preview {
+  .handwriting-preview,
+  .handwriting-stage {
     width: auto !important;
     height: auto !important;
     margin: 0 !important;
@@ -295,18 +306,20 @@ h2 {
 
   .handwriting-sheet,
   .handwriting-page {
-    width: 284mm !important;
-    height: 196mm !important;
-    max-width: 284mm !important;
-    max-height: 196mm !important;
+    width: 282mm !important;
+    height: 193mm !important;
+    max-width: 282mm !important;
+    max-height: 193mm !important;
+    min-width: 0 !important;
+    min-height: 0 !important;
     margin: 0 auto !important;
     padding: 0 !important;
     overflow: hidden !important;
     box-sizing: border-box !important;
     transform: none !important;
     transform-origin: initial !important;
-    grid-template-rows: 14mm 34mm 34mm 78mm 24mm;
-    gap: 3mm;
+    grid-template-rows: 14mm 34mm 34mm 76mm 18mm;
+    gap: 2mm;
   }
 
   .sheet-header {
@@ -365,7 +378,7 @@ h2 {
     width: 100%;
     min-width: 0;
     max-width: 100%;
-    height: 100%;
+    height: auto;
     table-layout: fixed;
     border-collapse: collapse;
     overflow: hidden;
@@ -373,11 +386,11 @@ h2 {
   }
 
   .log-table th {
-    height: 6mm;
+    height: 5.4mm;
   }
 
   .log-table tbody tr {
-    height: 8.1mm;
+    height: 7.2mm;
   }
 
   .log-table th,
@@ -389,12 +402,55 @@ h2 {
   }
 
   .memo-section {
-    height: 24mm;
-    min-height: 0;
-    padding-bottom: 1.2mm;
+    height: 18mm !important;
+    min-height: 0 !important;
+    margin-bottom: 0 !important;
+    padding-bottom: 0 !important;
+    break-inside: auto !important;
+    page-break-inside: auto !important;
   }
 
   .memo-lines {
-    height: calc(100% - 3.8mm);
+    height: 12mm !important;
+    margin-bottom: 0 !important;
+    padding-bottom: 0 !important;
+  }
+
+  .memo-lines > :last-child {
+    margin-bottom: 0 !important;
+  }
+
+  .handwriting-sheet > :last-child {
+    margin-bottom: 0 !important;
+    padding-bottom: 0 !important;
+    break-after: auto !important;
+    page-break-after: auto !important;
+  }
+}
+
+@supports (-webkit-touch-callout: none) {
+  @media print {
+    .handwriting-sheet,
+    .handwriting-page {
+      width: 279mm !important;
+      height: 190mm !important;
+      max-width: 279mm !important;
+      max-height: 190mm !important;
+      grid-template-rows: 14mm 34mm 34mm 74mm 15mm;
+      gap: 1mm !important;
+    }
+
+    .memo-section {
+      height: 15mm !important;
+      margin-bottom: 0 !important;
+      padding-bottom: 0 !important;
+    }
+
+    .memo-lines,
+    .memo-lines > :last-child,
+    .handwriting-sheet > :last-child {
+      margin-bottom: 0 !important;
+      padding-bottom: 0 !important;
+    }
   }
 }
