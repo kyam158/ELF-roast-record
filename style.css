@@ -35,7 +35,8 @@ textarea {
   -webkit-text-size-adjust: 100%;
 }
 
-button {
+button,
+.button-link {
   min-width: 44px;
   min-height: 48px;
   border: 1px solid var(--elf-green);
@@ -47,8 +48,17 @@ button {
   font-weight: 700;
 }
 
+.button-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+}
+
 button:hover,
-button:focus-visible {
+button:focus-visible,
+.button-link:hover,
+.button-link:focus-visible {
   background: var(--elf-green-light);
 }
 

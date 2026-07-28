@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="ELF COFFEE ROASTERS の手書き焙煎記録用紙">
+  <title>ELF Roast Record Handwriting Sheet</title>
+  <link rel="stylesheet" href="./handwriting.css">
+</head>
+<body>
+  <main class="sheet" aria-label="ELF Roast Record 手書き用紙">
+    <header class="sheet-header">
+      <div class="brand">
+        <img src="./logo.png" alt="ELF COFFEE ROASTERS">
+        <div>
+          <h1>ELF Roast Record</h1>
+          <p>COFFEE ROASTING RECORD</p>
+        </div>
+      </div>
+      <p class="sheet-type">HANDWRITING SHEET</p>
+    </header>
+
+    <section class="top-grid" aria-label="基本情報・生豆情報・投入条件">
+      <div class="panel basic-panel">
+        <h2>基本情報</h2>
+        <div class="line-field"><span>焙煎日</span><b></b></div>
+        <div class="weather-row" aria-label="天気">
+          <span>天気</span>
+          <label><i></i>晴</label>
+          <label><i></i>曇</label>
+          <label><i></i>雨</label>
+          <label><i></i>雪</label>
+        </div>
+        <div class="line-field unit"><span>気温</span><b></b><em>℃</em></div>
+      </div>
+
+      <div class="panel bean-panel">
+        <h2>生豆情報</h2>
+        <div class="two-col">
+          <div class="line-field"><span>国名</span><b></b></div>
+          <div class="line-field"><span>農園</span><b></b></div>
+          <div class="line-field"><span>品種</span><b></b></div>
+          <div class="line-field"><span>プロセス</span><b></b></div>
+        </div>
+        <div class="line-field unit"><span>標高</span><b></b><em>m</em></div>
+      </div>
+
+      <div class="panel charge-panel">
+        <h2>投入条件</h2>
+        <div class="two-col">
+          <div class="line-field unit"><span>生豆重量</span><b></b><em>g</em></div>
+          <div class="line-field unit"><span>投入温度</span><b></b><em>℃</em></div>
+          <div class="line-field unit"><span>焙煎後重量</span><b></b><em>g</em></div>
+          <div class="line-field unit"><span>重量減少率</span><b></b><em>%</em></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="event-phase-grid" aria-label="イベント・フェーズ">
+      <div class="panel">
+        <h2>イベント</h2>
+        <table class="write-table event-table">
+          <thead>
+            <tr><th>イベント</th><th>時間</th><th>温度</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>BOTTOM</td><td></td><td></td></tr>
+            <tr><td>DRY END</td><td></td><td></td></tr>
+            <tr><td>FC（First Crack）</td><td></td><td></td></tr>
+            <tr><td>END</td><td></td><td></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="panel">
+        <h2>フェーズ</h2>
+        <table class="write-table phase-table">
+          <thead>
+            <tr><th>フェーズ</th><th>時間</th><th>割合</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Dry</td><td></td><td></td></tr>
+            <tr><td>Maillard</td><td></td><td></td></tr>
+            <tr><td>Development</td><td></td><td></td></tr>
+            <tr><td>TOTAL</td><td></td><td>100%</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="panel log-section" aria-label="1分ごとのログ">
+      <h2>1分ごとのログ</h2>
+      <div class="log-grid">
+        <table class="write-table log-table">
+          <thead>
+            <tr><th>時間</th><th>温度</th><th>ROR</th><th>ガス圧</th><th>ダンパー</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>0:00</td><td></td><td></td><td></td><td></td></tr>
+            <tr><td>1:00</td><td></td><td></td><td></td><td></td></tr>
+            <tr><td>2:00</td><td></td><td></td><td></td><td></td></tr>
+            <tr><td>3:00</td><td></td><td></td><td></td><td></td></tr>
+            <tr><td>4:00</td><td></td><td></td><td></td><td></td></tr>
+            <tr><td>5:00</td><td></td><td></td><td></td><td></td></tr>
+            <tr><td>6:00</td><td></td><td></td><td></td><td></td></tr>
+            <tr><td>7:00</td><td></td><td></td><td></td><td></td></tr>
+          </tbody>
+        </table>
+
+        <table class="write-table log-table">
+          <thead>
+            <tr><th>時間</th><th>温度</th><th>ROR</th><th>ガス圧</th><th>ダンパー</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>8:00</td><td></td><td></td><td></td><td></td></tr>
+            <tr><td>9:00</td><td></td><td></td><td></td><td></td></tr>
+            <tr><td>10:00</td><td></td><td></td><td></td><td></td></tr>
+            <tr><td>11:00</td><td></td><td></td><td></td><td></td></tr>
+            <tr><td>12:00</td><td></td><td></td><td></td><td></td></tr>
+            <tr><td>13:00</td><td></td><td></td><td></td><td></td></tr>
+            <tr><td>14:00</td><td></td><td></td><td></td><td></td></tr>
+            <tr><td>15:00</td><td></td><td></td><td></td><td></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="panel memo-section" aria-label="焙煎メモ">
+      <h2>焙煎メモ</h2>
+      <div class="memo-lines">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+    </section>
+  </main>
+</body>
+</html>
