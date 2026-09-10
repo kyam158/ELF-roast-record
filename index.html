@@ -5,9 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="ELF COFFEE ROASTERS の焙煎記録用ブラウザアプリ">
   <title>ELF Roast Record</title>
+  <link rel="icon" href="data:,">
   <link rel="stylesheet" href="style.css">
 </head>
-<body>
+<body class="mode-edit">
   <header class="site-header">
     <div class="header-inner">
       <div class="brand">
@@ -22,7 +23,7 @@
   </header>
 
   <main class="page-shell">
-    <form id="roastForm" novalidate>
+    <form id="roastForm" class="edit-mode" novalidate>
       <section class="record-section" aria-labelledby="basic-title">
         <div class="section-heading">
           <span>1</span>
@@ -213,6 +214,72 @@
         </div>
       </section>
     </form>
+
+    <section id="viewMode" class="view-mode" aria-labelledby="view-title">
+      <div class="viewer-header">
+        <div>
+          <p class="viewer-kicker">閲覧モード</p>
+          <h2 id="view-title">焙煎記録</h2>
+        </div>
+        <div class="viewer-actions">
+          <button type="button" class="primary" id="editRecordBtn">編集する</button>
+          <button type="button" id="viewNewRecordBtn">新規作成</button>
+          <button type="button" id="viewPrintBtn">A4印刷</button>
+          <button type="button" id="viewExportCsvBtn">CSV出力</button>
+        </div>
+      </div>
+
+      <nav class="viewer-tabs" role="tablist" aria-label="閲覧カテゴリ">
+        <button type="button" role="tab" id="tab-overview" aria-controls="panel-overview" aria-selected="true" data-view-tab="overview">概要</button>
+        <button type="button" role="tab" id="tab-events" aria-controls="panel-events" aria-selected="false" data-view-tab="events">イベント</button>
+        <button type="button" role="tab" id="tab-profile" aria-controls="panel-profile" aria-selected="false" data-view-tab="profile">プロファイル</button>
+        <button type="button" role="tab" id="tab-log" aria-controls="panel-log" aria-selected="false" data-view-tab="log">ログ</button>
+        <button type="button" role="tab" id="tab-memo" aria-controls="panel-memo" aria-selected="false" data-view-tab="memo">メモ</button>
+      </nav>
+
+      <div class="viewer-panels">
+        <section class="viewer-panel" id="panel-overview" role="tabpanel" aria-labelledby="tab-overview" data-view-panel="overview">
+          <div class="viewer-grid three" id="viewOverview"></div>
+        </section>
+
+        <section class="viewer-panel" id="panel-events" role="tabpanel" aria-labelledby="tab-events" data-view-panel="events" hidden>
+          <div class="viewer-grid two" id="viewEvents"></div>
+        </section>
+
+        <section class="viewer-panel" id="panel-profile" role="tabpanel" aria-labelledby="tab-profile" data-view-panel="profile" hidden>
+          <div class="viewer-chart chart-wrapper">
+            <div class="chart-legend" aria-hidden="true">
+              <span><i class="legend-line temp-line"></i>温度</span>
+              <span><i class="legend-line ror-line"></i>ROR</span>
+            </div>
+            <canvas id="viewerRoastChart" aria-label="閲覧用の焙煎温度とRORの推移グラフ" role="img"></canvas>
+            <p class="chart-empty-message">ログに温度を入力するとグラフが表示されます</p>
+          </div>
+          <div class="viewer-event-summary" id="viewProfileEvents"></div>
+        </section>
+
+        <section class="viewer-panel" id="panel-log" role="tabpanel" aria-labelledby="tab-log" data-view-panel="log" hidden>
+          <div class="viewer-log-wrap">
+            <table class="viewer-log-table">
+              <thead>
+                <tr>
+                  <th>時間</th>
+                  <th>温度</th>
+                  <th>ROR</th>
+                  <th>ガス圧</th>
+                  <th>ダンパー</th>
+                </tr>
+              </thead>
+              <tbody id="viewLogBody"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="viewer-panel" id="panel-memo" role="tabpanel" aria-labelledby="tab-memo" data-view-panel="memo" hidden>
+          <div class="viewer-memo" id="viewMemo"></div>
+        </section>
+      </div>
+    </section>
 
     <section class="record-section history-section" aria-labelledby="history-title">
       <div class="section-heading">

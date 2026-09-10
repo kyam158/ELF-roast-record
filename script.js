@@ -22,8 +22,19 @@
   var historyList = document.getElementById("historyList");
   var historySearch = document.getElementById("historySearch");
   var historyCount = document.getElementById("historyCount");
+  var viewMode = document.getElementById("viewMode");
+  var viewTitle = document.getElementById("view-title");
+  var viewOverview = document.getElementById("viewOverview");
+  var viewEvents = document.getElementById("viewEvents");
+  var viewLogBody = document.getElementById("viewLogBody");
+  var viewMemo = document.getElementById("viewMemo");
+  var viewProfileEvents = document.getElementById("viewProfileEvents");
+  var viewerRoastChartCanvas = document.getElementById("viewerRoastChart");
 
   var currentId = "";
+  var currentMode = "edit";
+  var activeViewTab = "overview";
+  var viewingRecord = null;
   var saveTimer = 0;
   var statusTimer = 0;
   let roastChartCanvas = null;
@@ -97,6 +108,18 @@
       window.print();
     });
     document.getElementById("deleteCurrentBtn").addEventListener("click", deleteCurrent);
+    document.getElementById("editRecordBtn").addEventListener("click", enterEditModeFromView);
+    document.getElementById("viewNewRecordBtn").addEventListener("click", newRecord);
+    document.getElementById("viewPrintBtn").addEventListener("click", function () {
+      window.print();
+    });
+    document.getElementById("viewExportCsvBtn").addEventListener("click", exportCsv);
+    viewMode.querySelectorAll("[data-view-tab]").forEach(function (tab) {
+      tab.addEventListener("click", function () {
+        setViewTab(tab.dataset.viewTab);
+      });
+      tab.addEventListener("keydown", handleViewTabKeydown);
+    });
     historySearch.addEventListener("input", renderHistory);
   }
 
@@ -139,6 +162,7 @@
   }
 
   function loadInitialData() {
+    setMode("edit");
     var draft = readJson(DRAFT_KEY, null);
     if (draft) {
       applyRecord(draft);
@@ -405,6 +429,7 @@
     localStorage.setItem(DRAFT_KEY, JSON.stringify(record));
     setStatus("履歴保存済み");
     renderHistory();
+    enterViewMode(record, "overview");
   }
 
   function newRecord() {
@@ -412,11 +437,13 @@
       return;
     }
     currentId = "";
+    viewingRecord = null;
     form.reset();
     document.getElementById("roastDate").value = todayString();
     localStorage.removeItem(DRAFT_KEY);
     updateComputedFields();
     clearRoastChart(true);
+    setMode("edit");
     setStatus("編集中");
   }
 
@@ -434,11 +461,13 @@
     });
     localStorage.setItem(STORAGE_KEY, JSON.stringify(records));
     currentId = "";
+    viewingRecord = null;
     form.reset();
     document.getElementById("roastDate").value = todayString();
     localStorage.removeItem(DRAFT_KEY);
     updateComputedFields();
     clearRoastChart(true);
+    setMode("edit");
     setStatus("編集中");
     renderHistory();
   }
@@ -470,7 +499,7 @@
         "<p>" + escapeHtml(historySummary(record)) + "</p>",
         "</div>",
         "<div class=\"history-actions\">",
-        "<button type=\"button\" data-load=\"" + record.id + "\">編集</button>",
+        "<button type=\"button\" data-load=\"" + record.id + "\">開く</button>",
         "<button type=\"button\" data-copy=\"" + record.id + "\">複製</button>",
         "<button type=\"button\" class=\"danger\" data-delete=\"" + record.id + "\">削除</button>",
         "</div>"
@@ -505,12 +534,192 @@
     applyRecord(record);
     if (asCopy) {
       currentId = "";
+      viewingRecord = null;
       setStatus("編集中");
+      setMode("edit");
+      saveDraft();
     } else {
-      setStatus("編集中");
+      enterViewMode(record, "overview");
+      setStatus("履歴保存済み");
     }
-    saveDraft();
     window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  function enterViewMode(record, tabName) {
+    viewingRecord = record;
+    applyRecord(record);
+    renderViewMode(record);
+    setMode("view");
+    setViewTab(tabName || "overview");
+  }
+
+  function enterEditModeFromView() {
+    if (viewingRecord) {
+      applyRecord(viewingRecord);
+    }
+    setMode("edit");
+    setStatus("編集中");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+    requestAnimationFrame(function () {
+      drawRoastChart();
+    });
+  }
+
+  function setMode(mode) {
+    currentMode = mode;
+    document.body.classList.toggle("mode-view", mode === "view");
+    document.body.classList.toggle("mode-edit", mode !== "view");
+  }
+
+  function renderViewMode(record) {
+    var safeRecord = record || collectRecord();
+    viewTitle.textContent = historyTitle(safeRecord);
+    viewOverview.innerHTML = [
+      viewerCard("基本情報", [
+        ["焙煎日", valueAt(safeRecord, "basic.roastDate")],
+        ["天気", valueAt(safeRecord, "basic.weather")],
+        ["気温", withUnit(valueAt(safeRecord, "basic.airTemp"), "℃")]
+      ]),
+      viewerCard("生豆情報", [
+        ["国名", valueAt(safeRecord, "bean.country")],
+        ["農園", valueAt(safeRecord, "bean.farm")],
+        ["品種", valueAt(safeRecord, "bean.variety")],
+        ["プロセス", valueAt(safeRecord, "bean.process")],
+        ["標高", withUnit(valueAt(safeRecord, "bean.altitude"), "m")]
+      ]),
+      viewerCard("投入条件", [
+        ["生豆重量", withUnit(valueAt(safeRecord, "charge.greenWeight"), "g")],
+        ["投入温度", withUnit(valueAt(safeRecord, "charge.chargeTemp"), "℃")],
+        ["焙煎後重量", withUnit(valueAt(safeRecord, "charge.roastedWeight"), "g")],
+        ["重量減少率", withUnit(valueAt(safeRecord, "charge.weightLoss"), "%")]
+      ])
+    ].join("");
+
+    viewEvents.innerHTML = [
+      viewerCard("イベント", EVENTS.map(function (eventItem) {
+        return [eventDisplayLabel(eventItem), eventValue(safeRecord, eventItem.key)];
+      })),
+      viewerCard("フェーズ", PHASES.map(function (phase) {
+        return [phase, phaseValue(safeRecord, phase)];
+      }))
+    ].join("");
+
+    viewProfileEvents.innerHTML = EVENTS.map(function (eventItem) {
+      return "<span>" + escapeHtml(eventDisplayLabel(eventItem)) + " " + escapeHtml(eventValue(safeRecord, eventItem.key)) + "</span>";
+    }).join("");
+
+    renderViewLog(safeRecord);
+    viewMemo.textContent = safeRecord.memo ? safeRecord.memo : "メモはありません";
+  }
+
+  function viewerCard(title, rows) {
+    return [
+      "<article class=\"viewer-card\">",
+      "<h3>" + escapeHtml(title) + "</h3>",
+      "<div class=\"viewer-values\">",
+      rows.map(function (row) {
+        return [
+          "<div class=\"viewer-value\">",
+          "<span class=\"viewer-label\">" + escapeHtml(row[0]) + "</span>",
+          "<span class=\"viewer-data\">" + escapeHtml(row[1] || "未入力") + "</span>",
+          "</div>"
+        ].join("");
+      }).join(""),
+      "</div>",
+      "</article>"
+    ].join("");
+  }
+
+  function renderViewLog(record) {
+    var rows = [];
+    for (var minute = 0; minute <= 15; minute += 1) {
+      var log = record.logs && record.logs[minute] ? record.logs[minute] : {};
+      rows.push([
+        "<tr>",
+        "<td>" + minute + ":00</td>",
+        "<td>" + escapeHtml(log.temp || "") + "</td>",
+        "<td>" + escapeHtml(log.ror || "") + "</td>",
+        "<td>" + escapeHtml(log.gas || "") + "</td>",
+        "<td>" + escapeHtml(log.damper || "") + "</td>",
+        "</tr>"
+      ].join(""));
+    }
+    viewLogBody.innerHTML = rows.join("");
+  }
+
+  function setViewTab(tabName) {
+    activeViewTab = tabName || "overview";
+    viewMode.querySelectorAll("[data-view-tab]").forEach(function (tab) {
+      var isActive = tab.dataset.viewTab === activeViewTab;
+      tab.setAttribute("aria-selected", isActive ? "true" : "false");
+      tab.tabIndex = isActive ? 0 : -1;
+    });
+    viewMode.querySelectorAll("[data-view-panel]").forEach(function (panel) {
+      panel.hidden = panel.dataset.viewPanel !== activeViewTab;
+    });
+    if (activeViewTab === "profile") {
+      requestAnimationFrame(function () {
+        drawRoastChart();
+      });
+    }
+  }
+
+  function handleViewTabKeydown(event) {
+    if (event.key !== "ArrowRight" && event.key !== "ArrowLeft") {
+      return;
+    }
+    event.preventDefault();
+    var tabs = Array.prototype.slice.call(viewMode.querySelectorAll("[data-view-tab]"));
+    var index = tabs.indexOf(event.currentTarget);
+    var nextIndex = event.key === "ArrowRight" ? index + 1 : index - 1;
+    if (nextIndex < 0) {
+      nextIndex = tabs.length - 1;
+    }
+    if (nextIndex >= tabs.length) {
+      nextIndex = 0;
+    }
+    tabs[nextIndex].focus();
+    setViewTab(tabs[nextIndex].dataset.viewTab);
+  }
+
+  function eventDisplayLabel(eventItem) {
+    if (eventItem.key === "bottom") {
+      return "BOTTOM";
+    }
+    if (eventItem.key === "dryEnd") {
+      return "DRY END";
+    }
+    if (eventItem.key === "firstCrack") {
+      return "FC";
+    }
+    return "END";
+  }
+
+  function eventValue(record, key) {
+    var value = record.events && record.events[key] ? record.events[key] : {};
+    var parts = [];
+    if (value.time) {
+      parts.push(value.time);
+    }
+    if (value.temp) {
+      parts.push(value.temp + "℃");
+    }
+    return parts.length ? parts.join(" / ") : "";
+  }
+
+  function phaseValue(record, phase) {
+    var value = record.phases && record.phases[phase] ? record.phases[phase] : null;
+    if (!value) {
+      return "";
+    }
+    if (phase === "TOTAL") {
+      return secondsToTime(value.seconds);
+    }
+    return secondsToTime(value.seconds) + " / " + value.ratio.toFixed(1) + "%";
+  }
+
+  function withUnit(value, unit) {
+    return value ? value + unit : "";
   }
 
   function deleteHistory(id) {
@@ -521,7 +730,9 @@
     localStorage.setItem(STORAGE_KEY, JSON.stringify(records));
     if (currentId === id) {
       currentId = "";
+      viewingRecord = null;
       localStorage.removeItem(DRAFT_KEY);
+      setMode("edit");
     }
     renderHistory();
     setStatus("履歴保存済み");
@@ -647,14 +858,18 @@
 
   function initializeRoastChart() {
     roastChartCanvas = document.getElementById("roastChart");
-    if (!roastChartCanvas) {
-      return;
+    if (roastChartCanvas) {
+      roastChartContext = roastChartCanvas.getContext("2d");
+    }
+    if (viewerRoastChartCanvas) {
+      viewerRoastChartCanvas._chartContext = viewerRoastChartCanvas.getContext("2d");
     }
 
-    roastChartContext = roastChartCanvas.getContext("2d");
     if (window.ResizeObserver) {
       chartResizeObserver = new ResizeObserver(resizeRoastChart);
-      chartResizeObserver.observe(roastChartCanvas.parentElement);
+      getChartTargets().forEach(function (target) {
+        chartResizeObserver.observe(target.canvas.parentElement);
+      });
     } else {
       window.addEventListener("resize", resizeRoastChart);
     }
@@ -696,10 +911,10 @@
   }
 
   function drawRoastChart() {
-    if (!roastChartCanvas || !roastChartContext) {
-      return;
-    }
+    getChartTargets().forEach(drawRoastChartForTarget);
+  }
 
+  function drawRoastChartForTarget(target) {
     const data = collectChartData();
     const hasTemperature = data.temperatures.some(function (point) {
       return point.value !== null;
@@ -707,17 +922,19 @@
     const hasRor = data.rors.some(function (point) {
       return point.value !== null;
     });
-    const wrapper = roastChartCanvas.parentElement;
+    const canvas = target.canvas;
+    const context = target.context;
+    const wrapper = canvas.parentElement;
 
     if (!hasTemperature && !hasRor) {
       wrapper.classList.remove("has-data");
-      clearRoastChart(true);
+      clearChartTarget(target, true);
       return;
     }
 
     wrapper.classList.add("has-data");
-    const size = resizeRoastChart(false);
-    const ctx = roastChartContext;
+    const size = resizeChartTarget(target, false);
+    const ctx = context;
     const isPrint = isChartPrintMode();
     const plot = {
       left: isPrint ? 34 : (size.width < 560 ? 38 : 52),
@@ -729,7 +946,7 @@
     plot.height = size.height - plot.top - plot.bottom;
 
     const scales = buildChartScales(data, plot);
-    clearRoastChart(false);
+    clearChartTarget(target, false);
     drawAxes(ctx, plot, scales, size);
     drawEventMarkers(ctx, plot, scales, data.events);
     drawTemperatureLine(ctx, plot, scales, data.temperatures);
@@ -836,22 +1053,26 @@
   }
 
   function resizeRoastChart(redraw) {
-    if (!roastChartCanvas || !roastChartContext) {
-      return { width: 0, height: 0 };
-    }
+    var size = { width: 0, height: 0 };
+    getChartTargets().forEach(function (target) {
+      size = resizeChartTarget(target, redraw);
+    });
+    return size;
+  }
 
-    const rect = roastChartCanvas.getBoundingClientRect();
+  function resizeChartTarget(target, redraw) {
+    const rect = target.canvas.getBoundingClientRect();
     const width = Math.max(320, Math.round(rect.width));
     const height = Math.max(isChartPrintMode() ? 90 : 180, Math.round(rect.height));
     const ratio = window.devicePixelRatio || 1;
     const pixelWidth = Math.round(width * ratio);
     const pixelHeight = Math.round(height * ratio);
 
-    if (roastChartCanvas.width !== pixelWidth || roastChartCanvas.height !== pixelHeight) {
-      roastChartCanvas.width = pixelWidth;
-      roastChartCanvas.height = pixelHeight;
+    if (target.canvas.width !== pixelWidth || target.canvas.height !== pixelHeight) {
+      target.canvas.width = pixelWidth;
+      target.canvas.height = pixelHeight;
     }
-    roastChartContext.setTransform(ratio, 0, 0, ratio, 0, 0);
+    target.context.setTransform(ratio, 0, 0, ratio, 0, 0);
 
     if (redraw !== false) {
       updateRoastChart();
@@ -860,19 +1081,22 @@
   }
 
   function clearRoastChart(resetState) {
-    if (!roastChartCanvas || !roastChartContext) {
-      return;
-    }
+    getChartTargets().forEach(function (target) {
+      clearChartTarget(target, resetState);
+    });
+  }
+
+  function clearChartTarget(target, resetState) {
     if (resetState) {
       window.clearTimeout(chartUpdateTimer);
-      roastChartCanvas.parentElement.classList.remove("has-data");
+      target.canvas.parentElement.classList.remove("has-data");
     }
     const ratio = window.devicePixelRatio || 1;
-    roastChartContext.clearRect(0, 0, roastChartCanvas.width / ratio, roastChartCanvas.height / ratio);
+    target.context.clearRect(0, 0, target.canvas.width / ratio, target.canvas.height / ratio);
   }
 
   function updateRoastChart() {
-    if (!roastChartCanvas) {
+    if (!getChartTargets().length) {
       return;
     }
     window.clearTimeout(chartUpdateTimer);
@@ -893,6 +1117,17 @@
 
   function isChartPrintMode() {
     return chartPrintMode || (window.matchMedia && window.matchMedia("print").matches);
+  }
+
+  function getChartTargets() {
+    var targets = [];
+    if (roastChartCanvas && roastChartContext) {
+      targets.push({ canvas: roastChartCanvas, context: roastChartContext });
+    }
+    if (viewerRoastChartCanvas && viewerRoastChartCanvas._chartContext) {
+      targets.push({ canvas: viewerRoastChartCanvas, context: viewerRoastChartCanvas._chartContext });
+    }
+    return targets;
   }
 
   function drawSegmentedLine(ctx, points, xScale, yScale, options) {
