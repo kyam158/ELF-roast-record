@@ -10,6 +10,20 @@
     { key: "endTemp", label: "END Temp", placeholder: "10:15" }
   ];
   var PHASES = ["Dry", "Maillard", "Development", "TOTAL"];
+  var AREA_ORDER = ["南米", "中南米", "アジア", "アフリカ", "その他"];
+  var AREA_COUNTRIES = {
+    "南米": ["brazil", "brasil", "ブラジル", "colombia", "コロンビア", "peru", "ペルー", "bolivia", "ボリビア", "ecuador", "エクアドル"],
+    "中南米": ["guatemala", "グアテマラ", "costa rica", "costarica", "コスタリカ", "panama", "パナマ", "el salvador", "elsalvador", "エルサルバドル", "honduras", "ホンジュラス", "nicaragua", "ニカラグア", "mexico", "メキシコ", "jamaica", "ジャマイカ", "dominican", "ドミニカ"],
+    "アジア": ["indonesia", "インドネシア", "thailand", "タイ", "china", "中国", "india", "インド", "vietnam", "ベトナム", "papua new guinea", "papuanewguinea", "png", "パプアニューギニア", "myanmar", "ミャンマー", "laos", "ラオス", "philippines", "フィリピン"],
+    "アフリカ": ["ethiopia", "エチオピア", "kenya", "ケニア", "rwanda", "ルワンダ", "burundi", "ブルンジ", "tanzania", "タンザニア", "uganda", "ウガンダ", "congo", "コンゴ", "malawi", "マラウイ", "zambia", "ザンビア"]
+  };
+  var PROCESS_RULES = [
+    { category: "アナエロビック", patterns: ["anaerobic", "アナエロビック"] },
+    { category: "その他発酵系", patterns: ["carbonic", "maceration", "cm", "lactic", "yeast", "thermal shock", "extended fermentation", "co-ferment", "coferment", "infused", "mosto", "fermentation", "ファーメンテーション", "発酵"] },
+    { category: "ウォッシュト", patterns: ["washed", "fully washed", "ウォッシュト", "ウォッシュド"] },
+    { category: "ナチュラル", patterns: ["natural", "dry process", "ナチュラル"] },
+    { category: "ハニー", patterns: ["honey", "yellow honey", "red honey", "black honey", "white honey", "ハニー"] }
+  ];
 
   var form = document.getElementById("roastForm");
   var statusBadge = document.getElementById("statusBadge");
@@ -22,6 +36,7 @@
   var historyList = document.getElementById("historyList");
   var historySearch = document.getElementById("historySearch");
   var historyCount = document.getElementById("historyCount");
+  var historyBreadcrumb = document.getElementById("historyBreadcrumb");
   var viewMode = document.getElementById("viewMode");
   var viewTitle = document.getElementById("view-title");
   var viewOverview = document.getElementById("viewOverview");
@@ -35,6 +50,8 @@
   var currentMode = "edit";
   var activeViewTab = "overview";
   var viewingRecord = null;
+  var historyMode = "all";
+  var historyPath = [];
   var saveTimer = 0;
   var statusTimer = 0;
   let roastChartCanvas = null;
@@ -119,6 +136,13 @@
         setViewTab(tab.dataset.viewTab);
       });
       tab.addEventListener("keydown", handleViewTabKeydown);
+    });
+    document.querySelectorAll("[data-history-mode]").forEach(function (button) {
+      button.addEventListener("click", function () {
+        historyMode = button.dataset.historyMode;
+        historyPath = [];
+        renderHistory();
+      });
     });
     historySearch.addEventListener("input", renderHistory);
   }
@@ -481,8 +505,19 @@
 
     historyCount.textContent = filtered.length + "件";
     historyList.innerHTML = "";
+    updateHistoryModeTabs();
+    renderHistoryBreadcrumb();
 
-    if (!filtered.length) {
+    if (historyMode !== "all") {
+      renderHistoryFolders(filtered);
+      return;
+    }
+
+    renderHistoryRecords(filtered);
+  }
+
+  function renderHistoryRecords(records) {
+    if (!records.length) {
       var empty = document.createElement("p");
       empty.className = "history-empty";
       empty.textContent = "保存済みの履歴はありません。";
@@ -490,7 +525,7 @@
       return;
     }
 
-    filtered.forEach(function (record) {
+    records.forEach(function (record) {
       var item = document.createElement("article");
       item.className = "history-item";
       item.innerHTML = [
@@ -522,6 +557,252 @@
         deleteHistory(button.dataset.delete);
       });
     });
+  }
+
+  function renderHistoryFolders(records) {
+    var folders = getHistoryFolderItems(records);
+    if (folders.type === "records") {
+      renderHistoryRecords(folders.records);
+      return;
+    }
+    if (!folders.items.length) {
+      var empty = document.createElement("p");
+      empty.className = "history-empty";
+      empty.textContent = "該当するフォルダはありません。";
+      historyList.appendChild(empty);
+      return;
+    }
+    folders.items.forEach(function (folder) {
+      var button = document.createElement("button");
+      button.type = "button";
+      button.className = "folder-item";
+      button.innerHTML = [
+        "<span class=\"folder-name\">" + escapeHtml(folder.label) + "</span>",
+        "<span class=\"folder-meta\">" + folder.count + "件 <b aria-hidden=\"true\">›</b></span>"
+      ].join("");
+      button.addEventListener("click", function () {
+        historyPath = historyPath.concat(folder.key);
+        renderHistory();
+      });
+      historyList.appendChild(button);
+    });
+  }
+
+  function getHistoryFolderItems(records) {
+    if (historyMode === "area") {
+      return getAreaFolderItems(records);
+    }
+    if (historyMode === "process") {
+      return getProcessFolderItems(records);
+    }
+    if (historyMode === "variety") {
+      return getVarietyFolderItems(records);
+    }
+    return { type: "records", records: records };
+  }
+
+  function getAreaFolderItems(records) {
+    if (historyPath.length === 0) {
+      return {
+        type: "folders",
+        items: AREA_ORDER.map(function (area) {
+          return { key: area, label: area, count: records.filter(function (record) {
+            return getRecordAreas(record).indexOf(area) !== -1;
+          }).length };
+        }).filter(function (folder) {
+          return folder.count > 0;
+        })
+      };
+    }
+    if (historyPath.length === 1) {
+      var area = historyPath[0];
+      var countryMap = {};
+      records.forEach(function (record) {
+        if (getRecordAreas(record).indexOf(area) === -1) {
+          return;
+        }
+        getCountries(record).forEach(function (country) {
+          var label = country || "国名未入力";
+          countryMap[label] = countryMap[label] || [];
+          countryMap[label].push(record);
+        });
+      });
+      return { type: "folders", items: objectKeys(countryMap).map(function (country) {
+        return { key: country, label: country, count: uniqueRecords(countryMap[country]).length };
+      }).sort(sortFoldersByLabel) };
+    }
+    return {
+      type: "records",
+      records: records.filter(function (record) {
+        return getRecordAreas(record).indexOf(historyPath[0]) !== -1 &&
+          getCountries(record).indexOf(historyPath[1]) !== -1;
+      })
+    };
+  }
+
+  function getProcessFolderItems(records) {
+    if (historyPath.length === 0) {
+      var categories = ["ウォッシュト", "ナチュラル", "ハニー", "アナエロビック", "その他発酵系", "その他"];
+      return { type: "folders", items: categories.map(function (category) {
+        return { key: category, label: category, count: records.filter(function (record) {
+          return getProcessCategory(valueAt(record, "bean.process")) === category;
+        }).length };
+      }).filter(function (folder) {
+        return folder.count > 0;
+      }) };
+    }
+    return { type: "records", records: records.filter(function (record) {
+      return getProcessCategory(valueAt(record, "bean.process")) === historyPath[0];
+    }) };
+  }
+
+  function getVarietyFolderItems(records) {
+    if (historyPath.length === 0) {
+      var varietyMap = {};
+      records.forEach(function (record) {
+        getVarieties(valueAt(record, "bean.variety")).forEach(function (variety) {
+          varietyMap[variety] = varietyMap[variety] || [];
+          varietyMap[variety].push(record);
+        });
+      });
+      return { type: "folders", items: objectKeys(varietyMap).map(function (variety) {
+        return { key: variety, label: variety, count: uniqueRecords(varietyMap[variety]).length };
+      }).sort(sortFoldersByLabel) };
+    }
+    return { type: "records", records: records.filter(function (record) {
+      return getVarieties(valueAt(record, "bean.variety")).indexOf(historyPath[0]) !== -1;
+    }) };
+  }
+
+  function updateHistoryModeTabs() {
+    document.querySelectorAll("[data-history-mode]").forEach(function (button) {
+      button.classList.toggle("is-active", button.dataset.historyMode === historyMode);
+    });
+  }
+
+  function renderHistoryBreadcrumb() {
+    var labels = {
+      all: "すべて",
+      area: "エリア",
+      process: "プロセス",
+      variety: "品種"
+    };
+    var parts = ["履歴", labels[historyMode]].concat(historyPath);
+    historyBreadcrumb.innerHTML = parts.map(function (part, index) {
+      if (index === parts.length - 1 || index === 0) {
+        return "<span>" + escapeHtml(part) + "</span>";
+      }
+      return "<button type=\"button\" data-breadcrumb-index=\"" + index + "\">" + escapeHtml(part) + "</button>";
+    }).join("<span aria-hidden=\"true\"> &gt; </span>");
+    historyBreadcrumb.querySelectorAll("[data-breadcrumb-index]").forEach(function (button) {
+      button.addEventListener("click", function () {
+        var index = Number(button.dataset.breadcrumbIndex);
+        historyPath = historyPath.slice(0, Math.max(0, index - 1));
+        renderHistory();
+      });
+    });
+  }
+
+  function getRecordAreas(record) {
+    var countries = getCountries(record);
+    var areas = countries.map(getAreaFromCountry);
+    return uniqueValues(areas.length ? areas : ["その他"]);
+  }
+
+  function getCountries(record) {
+    var country = valueAt(record, "bean.country");
+    var countries = splitMultiValue(country).filter(Boolean);
+    if (!countries.length) {
+      return ["国名未入力"];
+    }
+    return countries;
+  }
+
+  function getAreaFromCountry(country) {
+    var normalized = normalizeText(country);
+    var matched = "";
+    AREA_ORDER.some(function (area) {
+      return (AREA_COUNTRIES[area] || []).some(function (pattern) {
+        if (normalized.indexOf(normalizeText(pattern)) !== -1) {
+          matched = area;
+          return true;
+        }
+        return false;
+      });
+    });
+    return matched || "その他";
+  }
+
+  function getProcessCategory(process) {
+    var normalized = normalizeText(process);
+    if (!normalized) {
+      return "その他";
+    }
+    var matched = "その他";
+    PROCESS_RULES.some(function (rule) {
+      return rule.patterns.some(function (pattern) {
+        if (normalized.indexOf(normalizeText(pattern)) !== -1) {
+          matched = rule.category;
+          return true;
+        }
+        return false;
+      });
+    });
+    return matched;
+  }
+
+  function getVarieties(variety) {
+    var values = splitMultiValue(variety);
+    return values.length ? uniqueValues(values) : ["品種未入力"];
+  }
+
+  function splitMultiValue(value) {
+    return String(value || "")
+      .replace(/\band\b/gi, "/")
+      .split(/\s*(?:\/|／|,|，|\+|＋|・|&|、)\s*/g)
+      .map(function (item) {
+        return item.trim();
+      })
+      .filter(Boolean);
+  }
+
+  function normalizeText(value) {
+    return String(value || "")
+      .normalize("NFKC")
+      .toLowerCase()
+      .replace(/\s+/g, " ")
+      .trim();
+  }
+
+  function uniqueRecords(records) {
+    var seen = {};
+    return records.filter(function (record) {
+      var id = record.id || JSON.stringify(record);
+      if (seen[id]) {
+        return false;
+      }
+      seen[id] = true;
+      return true;
+    });
+  }
+
+  function uniqueValues(values) {
+    var seen = {};
+    return values.filter(function (value) {
+      if (seen[value]) {
+        return false;
+      }
+      seen[value] = true;
+      return true;
+    });
+  }
+
+  function objectKeys(object) {
+    return Object.keys(object);
+  }
+
+  function sortFoldersByLabel(a, b) {
+    return a.label.localeCompare(b.label, "ja");
   }
 
   function loadHistory(id, asCopy) {

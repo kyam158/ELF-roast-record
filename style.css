@@ -483,6 +483,48 @@ td input {
   margin-bottom: 14px;
 }
 
+.history-mode-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+  overflow-x: auto;
+  white-space: nowrap;
+  -webkit-overflow-scrolling: touch;
+}
+
+.history-mode-tabs button {
+  flex: 0 0 auto;
+  min-height: 44px;
+  padding: 0 14px;
+  border-color: var(--line);
+  color: var(--text);
+}
+
+.history-mode-tabs button.is-active {
+  border-color: var(--elf-green);
+  color: #fff;
+  background: var(--elf-green);
+}
+
+.history-breadcrumb {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+  margin-bottom: 12px;
+  color: var(--muted);
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.history-breadcrumb button {
+  min-height: 36px;
+  padding: 0 8px;
+  border: 0;
+  color: var(--elf-green);
+  background: transparent;
+}
+
 .history-tools input {
   flex: 1 1 auto;
 }
@@ -531,6 +573,36 @@ td input {
   padding: 0 14px;
 }
 
+.folder-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  min-height: 58px;
+  border-color: var(--line);
+  padding: 0 14px;
+  color: var(--text);
+  text-align: left;
+  background: #fff;
+}
+
+.folder-item:hover,
+.folder-item:focus-visible {
+  border-color: var(--elf-green);
+}
+
+.folder-name {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.folder-meta {
+  flex: 0 0 auto;
+  color: var(--muted);
+  font-weight: 700;
+}
+
 .mode-view .edit-mode {
   display: none;
 }
@@ -564,6 +636,12 @@ td input {
   display: grid;
   grid-template-columns: 1fr;
   gap: 10px;
+}
+
+.viewer-actions-bottom {
+  margin-top: 22px;
+  padding: 20px 0 0;
+  border-top: 1px solid var(--line);
 }
 
 .viewer-tabs {
@@ -718,6 +796,10 @@ td input {
 
   .viewer-actions {
     grid-template-columns: repeat(4, auto);
+  }
+
+  .viewer-actions-bottom {
+    justify-content: start;
   }
 
   .viewer-grid.two {

@@ -221,12 +221,6 @@
           <p class="viewer-kicker">閲覧モード</p>
           <h2 id="view-title">焙煎記録</h2>
         </div>
-        <div class="viewer-actions">
-          <button type="button" class="primary" id="editRecordBtn">編集する</button>
-          <button type="button" id="viewNewRecordBtn">新規作成</button>
-          <button type="button" id="viewPrintBtn">A4印刷</button>
-          <button type="button" id="viewExportCsvBtn">CSV出力</button>
-        </div>
       </div>
 
       <nav class="viewer-tabs" role="tablist" aria-label="閲覧カテゴリ">
@@ -279,6 +273,13 @@
           <div class="viewer-memo" id="viewMemo"></div>
         </section>
       </div>
+
+      <div class="viewer-actions viewer-actions-bottom">
+        <button type="button" class="primary" id="editRecordBtn">編集する</button>
+        <button type="button" id="viewNewRecordBtn">新規作成</button>
+        <button type="button" id="viewPrintBtn">A4印刷</button>
+        <button type="button" id="viewExportCsvBtn">CSV出力</button>
+      </div>
     </section>
 
     <section class="record-section history-section" aria-labelledby="history-title">
@@ -290,6 +291,13 @@
         <input type="search" id="historySearch" placeholder="履歴を検索" aria-label="履歴を検索">
         <span id="historyCount">0件</span>
       </div>
+      <div class="history-mode-tabs" role="tablist" aria-label="履歴の表示方法">
+        <button type="button" class="is-active" data-history-mode="all">すべて</button>
+        <button type="button" data-history-mode="area">エリア</button>
+        <button type="button" data-history-mode="process">プロセス</button>
+        <button type="button" data-history-mode="variety">品種</button>
+      </div>
+      <div class="history-breadcrumb" id="historyBreadcrumb" aria-live="polite"></div>
       <div class="history-list" id="historyList"></div>
     </section>
   </main>
