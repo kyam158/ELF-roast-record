@@ -341,7 +341,7 @@ td input:focus {
   width: 100%;
   border: 1px solid var(--line);
   border-radius: 8px;
-  padding: 12px;
+  padding: 10px 8px;
   background: #fff;
 }
 
@@ -726,7 +726,7 @@ td input {
 .viewer-chart #viewerRoastChart {
   display: block;
   width: 100%;
-  height: 340px;
+  height: 380px;
 }
 
 .viewer-event-summary {
@@ -920,7 +920,7 @@ td input {
   }
 
   .chart-wrapper {
-    padding: 10px 8px;
+    padding: 8px 4px;
   }
 
   .chart-legend {
@@ -931,11 +931,11 @@ td input {
   }
 
   #roastChart {
-    height: 300px;
+    height: 320px;
   }
 
   .viewer-chart #viewerRoastChart {
-    height: 340px;
+    height: 370px;
   }
 
   .chart-empty-message {

@@ -9,6 +9,7 @@
     { key: "firstCrack", label: "FC（First Crack）", placeholder: "8:30" },
     { key: "endTemp", label: "END Temp", placeholder: "10:15" }
   ];
+  var BASE_CHART_MAX_MINUTE = 12;
   var PHASES = ["Dry", "Maillard", "Development", "TOTAL"];
   var AREA_ORDER = ["南米", "中南米", "アジア", "アフリカ", "その他"];
   var AREA_COUNTRIES = {
@@ -1192,8 +1193,12 @@
     const xMax = getChartXMax(temperatures, chartEvents);
 
     return {
-      temperatures: temperatures,
-      rors: rors,
+      temperatures: temperatures.filter(function (point) {
+        return point.minute <= xMax;
+      }),
+      rors: rors.filter(function (point) {
+        return point.minute <= xMax;
+      }),
       events: chartEvents.filter(function (eventItem) {
         return eventItem.minute <= xMax;
       }),
@@ -1264,13 +1269,13 @@
   }
 
   function getChartXMax(temperatures, events) {
-    const maxMinute = temperatures.concat(events).reduce(function (max, point) {
-      if (point.value === null && point.key === undefined) {
-        return max;
-      }
-      return Math.max(max, point.minute || 0);
-    }, 15);
-    return Math.max(15, Math.ceil(maxMinute));
+    const endEvent = events.find(function (eventItem) {
+      return eventItem.key === "endTemp";
+    });
+    if (endEvent && endEvent.minute > BASE_CHART_MAX_MINUTE) {
+      return Math.ceil(endEvent.minute);
+    }
+    return BASE_CHART_MAX_MINUTE;
   }
 
   function drawRoastChart() {
@@ -1300,10 +1305,10 @@
     const ctx = context;
     const isPrint = isChartPrintMode();
     const plot = {
-      left: isPrint ? 34 : (size.width < 560 ? 38 : 52),
-      right: isPrint ? 34 : (size.width < 560 ? 38 : 50),
+      left: isPrint ? 34 : (size.width < 560 ? 30 : 44),
+      right: isPrint ? 34 : (size.width < 560 ? 30 : 42),
       top: isPrint ? 12 : 18,
-      bottom: isPrint ? 20 : (size.width < 560 ? 32 : 40)
+      bottom: isPrint ? 20 : (size.width < 560 ? 30 : 38)
     };
     plot.width = size.width - plot.left - plot.right;
     plot.height = size.height - plot.top - plot.bottom;
