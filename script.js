@@ -1159,7 +1159,7 @@
   }
 
   function collectChartData() {
-    const temperatures = [];
+    let temperatures = [];
     const rors = [];
     const events = [
       { key: "bottom", label: "BOTTOM" },
@@ -1167,6 +1167,7 @@
       { key: "firstCrack", label: "FC" },
       { key: "endTemp", label: "END" }
     ];
+    const endPoint = getEndChartPoint();
 
     for (let minute = 0; minute <= 15; minute += 1) {
       const temp = parseChartNumber(getLogInput(minute, "temp").value);
@@ -1175,20 +1176,101 @@
       rors.push({ minute: minute, value: ror });
     }
 
+    temperatures = applyEndPointToTemperatures(temperatures, endPoint);
+
+    const chartEvents = events.map(function (eventItem) {
+      const seconds = parseTimeToSeconds(getEventTimeInput(eventItem.key).value);
+      return {
+        key: eventItem.key,
+        label: eventItem.label,
+        minute: seconds === null ? null : seconds / 60,
+        temp: parseChartNumber(getEventTempInput(eventItem.key).value)
+      };
+    }).filter(function (eventItem) {
+      return eventItem.minute !== null && eventItem.minute >= 0;
+    });
+    const xMax = getChartXMax(temperatures, chartEvents);
+
     return {
       temperatures: temperatures,
       rors: rors,
-      events: events.map(function (eventItem) {
-        const seconds = parseTimeToSeconds(getEventTimeInput(eventItem.key).value);
-        return {
-          key: eventItem.key,
-          label: eventItem.label,
-          minute: seconds === null ? null : seconds / 60
-        };
-      }).filter(function (eventItem) {
-        return eventItem.minute !== null && eventItem.minute >= 0 && eventItem.minute <= 15;
-      })
+      events: chartEvents.filter(function (eventItem) {
+        return eventItem.minute <= xMax;
+      }),
+      xMax: xMax
     };
+  }
+
+  function getEndChartPoint() {
+    const seconds = parseTimeToSeconds(getEventTimeInput("endTemp").value);
+    const temp = parseChartNumber(getEventTempInput("endTemp").value);
+
+    if (seconds === null || temp === null) {
+      return null;
+    }
+    return {
+      minute: seconds / 60,
+      value: temp
+    };
+  }
+
+  function applyEndPointToTemperatures(points, endPoint) {
+    if (!endPoint) {
+      return points;
+    }
+
+    let replaced = false;
+    let adjusted = points.reduce(function (result, point) {
+      if (point.minute > endPoint.minute) {
+        return result;
+      }
+      if (Math.abs(point.minute - endPoint.minute) < 0.0001) {
+        result.push({
+          minute: point.minute,
+          value: endPoint.value,
+          isEndPoint: true
+        });
+        replaced = true;
+        return result;
+      }
+      result.push(point);
+      return result;
+    }, []);
+
+    const lastTemperatureBeforeEnd = adjusted.reduce(function (latest, point) {
+      if (point.value === null || point.isEndPoint) {
+        return latest;
+      }
+      return !latest || point.minute > latest.minute ? point : latest;
+    }, null);
+
+    if (lastTemperatureBeforeEnd) {
+      adjusted = adjusted.filter(function (point) {
+        return point.value !== null || point.minute <= lastTemperatureBeforeEnd.minute;
+      });
+    }
+
+    if (!replaced) {
+      adjusted.push({
+        minute: endPoint.minute,
+        value: endPoint.value,
+        isEndPoint: true
+      });
+    }
+
+    return adjusted.sort(function (a, b) {
+      return a.minute - b.minute;
+    });
+  }
+
+  function getChartXMax(temperatures, events) {
+    const maxMinute = temperatures.concat(events).reduce(function (max, point) {
+      if (point.value === null && point.key === undefined) {
+        return max;
+      }
+      return Math.max(max, point.minute || 0);
+    }, 15);
+    return Math.max(15, Math.ceil(maxMinute));
   }
 
   function drawRoastChart() {
@@ -1246,7 +1328,7 @@
     ctx.textAlign = "center";
     ctx.textBaseline = "top";
 
-    for (let minute = 0; minute <= 15; minute += 1) {
+    for (let minute = 0; minute <= scales.xMax; minute += 1) {
       const x = scales.x(minute);
       ctx.beginPath();
       ctx.moveTo(x, plot.top);
@@ -1329,7 +1411,32 @@
       ctx.lineTo(x, plot.top + plot.height);
       ctx.stroke();
       ctx.fillText(eventItem.label, x, labelY);
+      if (eventItem.key === "endTemp" && eventItem.temp !== null) {
+        drawEndEventPoint(ctx, plot, scales, eventItem);
+      }
     });
+    ctx.restore();
+  }
+
+  function drawEndEventPoint(ctx, plot, scales, eventItem) {
+    const x = scales.x(eventItem.minute);
+    const y = scales.tempY(eventItem.temp);
+    const label = formatAxisNumber(eventItem.temp) + "℃";
+    const labelY = Math.max(plot.top + 2, Math.min(plot.top + plot.height - 12, y - 18));
+
+    ctx.save();
+    ctx.setLineDash([]);
+    ctx.fillStyle = "#234b36";
+    ctx.strokeStyle = "#ffffff";
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(x, y, isChartPrintMode() ? 3 : 4, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+    ctx.fillStyle = "#234b36";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "top";
+    ctx.fillText(label, Math.max(plot.left + 14, Math.min(plot.left + plot.width - 14, x)), labelY);
     ctx.restore();
   }
 
@@ -1454,7 +1561,7 @@
 
     return {
       x: function (minute) {
-        return plot.left + (minute / 15) * plot.width;
+        return plot.left + (minute / data.xMax) * plot.width;
       },
       tempY: function (value) {
         return plot.top + ((tempRange.max - value) / (tempRange.max - tempRange.min)) * plot.height;
@@ -1462,6 +1569,7 @@
       rorY: function (value) {
         return plot.top + ((rorRange.max - value) / (rorRange.max - rorRange.min)) * plot.height;
       },
+      xMax: data.xMax,
       tempTicks: makeTicks(tempRange.min, tempRange.max, 5),
       rorTicks: makeTicks(rorRange.min, rorRange.max, 5)
     };
